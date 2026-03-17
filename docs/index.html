@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cash App x FUMB Lightning Deposits</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --surface: #ffffff;
+      --surface-2: #eef0f3;
+      --border: #dde0e6;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --green: #16a34a;
+      --red: #dc2626;
+      --orange: #f7931a;
+      --blue: #1a73e8;
+      --blue-dark: #1a1a6e;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px 40px; }
+
+    .top-bar {
+      background: var(--text); color: #fff; padding: 22px 32px; margin: 0 -24px 0;
+      display: flex; align-items: center; gap: 14px;
+    }
+    .top-bar-icon { width: 28px; height: 28px; }
+    .top-bar h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.3px; color: #fff; }
+
+    .meta-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 16px 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 22px; flex-wrap: wrap; gap: 10px;
+    }
+    .last-updated { font-size: 0.85rem; color: var(--text-muted); }
+    .last-updated strong { color: var(--text); font-weight: 700; }
+
+    .controls-bar {
+      display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 16px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .ctrl-group { display: flex; align-items: center; gap: 6px; }
+    .ctrl-group + .ctrl-group { padding-left: 18px; border-left: 1px solid var(--border); }
+    .toggle-group { display: flex; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 2px; }
+    .toggle-btn { padding: 5px 12px; border: none; background: none; color: var(--text-muted); font-size: 0.78rem; font-weight: 600; cursor: pointer; border-radius: 6px; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+    .toggle-btn:hover { color: var(--text); }
+    .toggle-btn.active { background: var(--text); color: #fff; }
+    .ctrl-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 5px; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; }
+    .stat-sub { font-size: 0.78rem; margin-top: 3px; font-weight: 600; }
+    .stat-sub.up { color: var(--green); }
+    .stat-sub.down { color: var(--red); }
+
+    .chart-wrapper { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .chart-title { font-size: 0.95rem; font-weight: 600; }
+    .chart-subtitle { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+    .chart-canvas-container { position: relative; width: 100%; height: 320px; }
+
+    .data-table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; margin-bottom: 22px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); overflow-x: auto; }
+    .data-table-wrap h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 14px; }
+    .data-tbl { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    .data-tbl thead th { text-align: right; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: var(--text-muted); padding: 7px 10px; border-bottom: 2px solid var(--border); }
+    .data-tbl thead th:first-child { text-align: left; }
+    .data-tbl tbody td { padding: 6px 10px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+    .data-tbl tbody td:first-child { text-align: left; font-weight: 500; }
+    .data-tbl tbody tr:hover { background: var(--surface-2); }
+    .data-tbl tbody tr:last-child td { border-bottom: none; }
+    .pct-up { color: var(--green); font-weight: 600; }
+    .pct-down { color: var(--red); font-weight: 600; }
+
+    footer { text-align: center; padding: 24px 0 12px; color: var(--text-muted); font-size: 0.76rem; line-height: 1.8; }
+
+    @media (max-width: 800px) { .chart-canvas-container { height: 260px; } }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="top-bar">
+    <h1>Cash App x FUMB Lightning Deposits</h1>
+  </div>
+
+  <div class="meta-bar">
+    <div class="last-updated">Data refreshed <strong id="refresh-ts"></strong></div>
+  </div>
+
+  <div class="controls-bar">
+    <div class="ctrl-group">
+      <span class="ctrl-label">Granularity</span>
+      <div class="toggle-group" id="granularity-toggle">
+        <button class="toggle-btn active" data-gran="daily">Daily</button>
+        <button class="toggle-btn" data-gran="weekly">Weekly</button>
+        <button class="toggle-btn" data-gran="monthly">Monthly</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-grid" id="stats-grid"></div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Volume (USD)</div>
+        <div class="chart-subtitle">Total USD equivalent of lightning deposits</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-volume"></canvas></div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Unique Customers</div>
+        <div class="chart-subtitle">Distinct customer tokens per period</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-customers"></canvas></div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Transactions</div>
+        <div class="chart-subtitle">Distinct transaction tokens per period</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-tx"></canvas></div>
+  </div>
+
+  <div class="data-table-wrap">
+    <h3>Lightning Deposits — Data Table</h3>
+    <div style="max-height: 480px; overflow-y: auto;">
+      <table class="data-tbl" id="data-table">
+        <thead><tr><th>Period</th><th>Volume (USD)</th><th>Customers</th><th>Transactions</th><th>Vol PoP</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>Cash App x FUMB Lightning Deposits</footer>
+</div>
+
+<script>
+const DAILY_DATA = [
+  {"ds":"2025-11-01","cust":1383,"usd":254.24,"tx":1739},
+  {"ds":"2025-11-02","cust":1472,"usd":257.15,"tx":1847},
+  {"ds":"2025-11-03","cust":1686,"usd":293.48,"tx":2092},
+  {"ds":"2025-11-04","cust":1543,"usd":258.20,"tx":1967},
+  {"ds":"2025-11-05","cust":1505,"usd":256.56,"tx":1886},
+  {"ds":"2025-11-06","cust":1465,"usd":240.78,"tx":1821},
+  {"ds":"2025-11-07","cust":1590,"usd":260.71,"tx":1975},
+  {"ds":"2025-11-08","cust":1446,"usd":244.13,"tx":1820},
+  {"ds":"2025-11-09","cust":1526,"usd":250.70,"tx":1917},
+  {"ds":"2025-11-10","cust":1661,"usd":287.44,"tx":2038},
+  {"ds":"2025-11-11","cust":1450,"usd":237.06,"tx":1757},
+  {"ds":"2025-11-12","cust":1481,"usd":253.22,"tx":1882},
+  {"ds":"2025-11-13","cust":1537,"usd":263.18,"tx":1914},
+  {"ds":"2025-11-14","cust":1562,"usd":239.11,"tx":1936},
+  {"ds":"2025-11-15","cust":1391,"usd":210.56,"tx":1748},
+  {"ds":"2025-11-16","cust":1594,"usd":246.54,"tx":2010},
+  {"ds":"2025-11-17","cust":1617,"usd":245.46,"tx":1969},
+  {"ds":"2025-11-18","cust":1538,"usd":224.45,"tx":1885},
+  {"ds":"2025-11-19","cust":1458,"usd":209.55,"tx":1832},
+  {"ds":"2025-11-20","cust":1623,"usd":239.06,"tx":1977},
+  {"ds":"2025-11-21","cust":1624,"usd":214.54,"tx":1999},
+  {"ds":"2025-11-22","cust":1462,"usd":189.47,"tx":1819},
+  {"ds":"2025-11-23","cust":1632,"usd":225.70,"tx":2101},
+  {"ds":"2025-11-24","cust":1680,"usd":238.08,"tx":2060},
+  {"ds":"2025-11-25","cust":1528,"usd":213.07,"tx":1920},
+  {"ds":"2025-11-26","cust":1492,"usd":213.82,"tx":1876},
+  {"ds":"2025-11-27","cust":1525,"usd":219.23,"tx":1928},
+  {"ds":"2025-11-28","cust":1534,"usd":216.09,"tx":1922},
+  {"ds":"2025-11-29","cust":1502,"usd":215.93,"tx":1929},
+  {"ds":"2025-11-30","cust":1583,"usd":222.18,"tx":2045},
+  {"ds":"2025-12-01","cust":1784,"usd":244.63,"tx":2236},
+  {"ds":"2025-12-02","cust":1554,"usd":216.79,"tx":1953},
+  {"ds":"2025-12-03","cust":1492,"usd":226.07,"tx":2044},
+  {"ds":"2025-12-04","cust":1729,"usd":257.57,"tx":2166},
+  {"ds":"2025-12-05","cust":1631,"usd":234.00,"tx":2046},
+  {"ds":"2025-12-06","cust":1493,"usd":212.16,"tx":1923},
+  {"ds":"2025-12-07","cust":1670,"usd":233.05,"tx":2141},
+  {"ds":"2025-12-08","cust":1744,"usd":247.39,"tx":2193},
+  {"ds":"2025-12-09","cust":1597,"usd":222.56,"tx":1923},
+  {"ds":"2025-12-10","cust":1464,"usd":214.64,"tx":1780},
+  {"ds":"2025-12-11","cust":1706,"usd":245.60,"tx":2130},
+  {"ds":"2025-12-12","cust":1652,"usd":235.12,"tx":2051},
+  {"ds":"2025-12-13","cust":1523,"usd":210.68,"tx":1920},
+  {"ds":"2025-12-14","cust":1578,"usd":226.31,"tx":2007},
+  {"ds":"2025-12-15","cust":1740,"usd":252.93,"tx":2217},
+  {"ds":"2025-12-16","cust":1644,"usd":219.11,"tx":2025},
+  {"ds":"2025-12-17","cust":1594,"usd":226.74,"tx":2008},
+  {"ds":"2025-12-18","cust":1697,"usd":236.61,"tx":2116},
+  {"ds":"2025-12-19","cust":1615,"usd":214.60,"tx":2012},
+  {"ds":"2025-12-20","cust":1518,"usd":207.64,"tx":1962},
+  {"ds":"2025-12-21","cust":1542,"usd":222.31,"tx":2051},
+  {"ds":"2025-12-22","cust":1617,"usd":230.76,"tx":2010},
+  {"ds":"2025-12-23","cust":1540,"usd":217.99,"tx":1903},
+  {"ds":"2025-12-24","cust":1413,"usd":201.33,"tx":1797},
+  {"ds":"2025-12-25","cust":1415,"usd":201.23,"tx":1801},
+  {"ds":"2025-12-26","cust":1461,"usd":206.16,"tx":1837},
+  {"ds":"2025-12-27","cust":1621,"usd":233.75,"tx":2014},
+  {"ds":"2025-12-28","cust":1671,"usd":244.03,"tx":2133},
+  {"ds":"2025-12-29","cust":1727,"usd":244.37,"tx":2162},
+  {"ds":"2025-12-30","cust":1500,"usd":209.76,"tx":1888},
+  {"ds":"2025-12-31","cust":1509,"usd":219.15,"tx":1857},
+  {"ds":"2026-01-01","cust":1526,"usd":221.07,"tx":1841},
+  {"ds":"2026-01-02","cust":1611,"usd":226.84,"tx":1966},
+  {"ds":"2026-01-03","cust":1549,"usd":220.16,"tx":1928},
+  {"ds":"2026-01-04","cust":1647,"usd":245.56,"tx":2052},
+  {"ds":"2026-01-05","cust":1727,"usd":268.04,"tx":2157},
+  {"ds":"2026-01-06","cust":1556,"usd":239.00,"tx":1948},
+  {"ds":"2026-01-07","cust":1517,"usd":230.73,"tx":1899},
+  {"ds":"2026-01-08","cust":1591,"usd":241.13,"tx":1960},
+  {"ds":"2026-01-09","cust":1606,"usd":229.41,"tx":1991},
+  {"ds":"2026-01-10","cust":1523,"usd":224.20,"tx":1903},
+  {"ds":"2026-01-11","cust":1613,"usd":234.68,"tx":1999},
+  {"ds":"2026-01-12","cust":1663,"usd":257.83,"tx":2022},
+  {"ds":"2026-01-13","cust":1558,"usd":228.09,"tx":1932},
+  {"ds":"2026-01-14","cust":1590,"usd":254.38,"tx":1947},
+  {"ds":"2026-01-15","cust":1667,"usd":267.25,"tx":2046},
+  {"ds":"2026-01-16","cust":1578,"usd":248.79,"tx":1901},
+  {"ds":"2026-01-17","cust":1470,"usd":231.70,"tx":1814},
+  {"ds":"2026-01-18","cust":1613,"usd":256.74,"tx":2001},
+  {"ds":"2026-01-19","cust":1747,"usd":257.42,"tx":2170},
+  {"ds":"2026-01-20","cust":1615,"usd":235.42,"tx":2029},
+  {"ds":"2026-01-21","cust":1626,"usd":238.95,"tx":2026},
+  {"ds":"2026-01-22","cust":1678,"usd":249.98,"tx":2064},
+  {"ds":"2026-01-23","cust":1579,"usd":222.00,"tx":1952},
+  {"ds":"2026-01-24","cust":1437,"usd":193.77,"tx":1772},
+  {"ds":"2026-01-25","cust":1589,"usd":218.98,"tx":2000},
+  {"ds":"2026-01-26","cust":1567,"usd":223.78,"tx":1930},
+  {"ds":"2026-01-27","cust":1537,"usd":214.12,"tx":1881},
+  {"ds":"2026-01-28","cust":1462,"usd":207.49,"tx":1799},
+  {"ds":"2026-01-29","cust":1556,"usd":223.53,"tx":1923},
+  {"ds":"2026-01-30","cust":1400,"usd":177.04,"tx":1713},
+  {"ds":"2026-01-31","cust":1399,"usd":177.46,"tx":1747},
+  {"ds":"2026-02-01","cust":1492,"usd":188.00,"tx":1836},
+  {"ds":"2026-02-02","cust":1550,"usd":194.62,"tx":1904},
+  {"ds":"2026-02-03","cust":1395,"usd":160.79,"tx":1709},
+  {"ds":"2026-02-04","cust":1311,"usd":159.56,"tx":1614},
+  {"ds":"2026-02-05","cust":1468,"usd":162.60,"tx":1778},
+  {"ds":"2026-02-06","cust":1375,"usd":145.41,"tx":1696},
+  {"ds":"2026-02-07","cust":1306,"usd":145.34,"tx":1567},
+  {"ds":"2026-02-08","cust":1374,"usd":159.29,"tx":1728},
+  {"ds":"2026-02-09","cust":1376,"usd":155.10,"tx":1666},
+  {"ds":"2026-02-10","cust":1267,"usd":137.41,"tx":1529},
+  {"ds":"2026-02-11","cust":1316,"usd":142.22,"tx":1625},
+  {"ds":"2026-02-12","cust":1391,"usd":151.90,"tx":1765},
+  {"ds":"2026-02-13","cust":1370,"usd":151.37,"tx":1664},
+  {"ds":"2026-02-14","cust":1231,"usd":137.61,"tx":1495},
+  {"ds":"2026-02-15","cust":1309,"usd":151.57,"tx":1663},
+  {"ds":"2026-02-16","cust":1414,"usd":152.67,"tx":1750},
+  {"ds":"2026-02-17","cust":1281,"usd":138.60,"tx":1600},
+  {"ds":"2026-02-18","cust":1278,"usd":136.49,"tx":1575},
+  {"ds":"2026-02-19","cust":1307,"usd":145.16,"tx":1622},
+  {"ds":"2026-02-20","cust":1258,"usd":136.06,"tx":1456},
+  {"ds":"2026-02-21","cust":1172,"usd":128.34,"tx":1424},
+  {"ds":"2026-02-22","cust":1274,"usd":143.16,"tx":1535},
+  {"ds":"2026-02-23","cust":1195,"usd":119.71,"tx":1438},
+  {"ds":"2026-02-24","cust":1112,"usd":118.45,"tx":1318},
+  {"ds":"2026-02-25","cust":1151,"usd":129.95,"tx":1399},
+  {"ds":"2026-02-26","cust":1210,"usd":142.44,"tx":1456},
+  {"ds":"2026-02-27","cust":1123,"usd":121.03,"tx":1302},
+  {"ds":"2026-02-28","cust":1000,"usd":108.87,"tx":1193},
+  {"ds":"2026-03-01","cust":1155,"usd":126.17,"tx":1360},
+  {"ds":"2026-03-02","cust":1041,"usd":122.51,"tx":1185},
+  {"ds":"2026-03-03","cust":746,"usd":93.40,"tx":843},
+  {"ds":"2026-03-04","cust":1023,"usd":135.67,"tx":1163},
+  {"ds":"2026-03-05","cust":1209,"usd":160.24,"tx":1408},
+  {"ds":"2026-03-06","cust":1061,"usd":126.85,"tx":1232},
+  {"ds":"2026-03-07","cust":1004,"usd":119.60,"tx":1169},
+  {"ds":"2026-03-08","cust":1041,"usd":125.48,"tx":1210},
+  {"ds":"2026-03-09","cust":1108,"usd":130.51,"tx":1278},
+  {"ds":"2026-03-10","cust":1002,"usd":117.56,"tx":1177},
+  {"ds":"2026-03-11","cust":1076,"usd":129.85,"tx":1282},
+  {"ds":"2026-03-12","cust":1118,"usd":139.36,"tx":1345},
+  {"ds":"2026-03-13","cust":1023,"usd":129.44,"tx":1201},
+  {"ds":"2026-03-14","cust":948,"usd":116.91,"tx":1126},
+  {"ds":"2026-03-15","cust":1064,"usd":138.77,"tx":1280},
+  {"ds":"2026-03-16","cust":922,"usd":113.83,"tx":1103}
+];
+
+const WEEKLY_DATA = [
+  {"ds":"2025-10-27","cust":2305,"usd":511.39,"tx":3586},
+  {"ds":"2025-11-03","cust":4570,"usd":1804.56,"tx":13478},
+  {"ds":"2025-11-10","cust":4628,"usd":1737.11,"tx":13285},
+  {"ds":"2025-11-17","cust":4853,"usd":1548.23,"tx":13582},
+  {"ds":"2025-11-24","cust":4761,"usd":1538.40,"tx":13680},
+  {"ds":"2025-12-01","cust":5013,"usd":1624.27,"tx":14509},
+  {"ds":"2025-12-08","cust":4994,"usd":1602.30,"tx":14004},
+  {"ds":"2025-12-15","cust":4978,"usd":1579.94,"tx":14391},
+  {"ds":"2025-12-22","cust":4740,"usd":1535.25,"tx":13495},
+  {"ds":"2025-12-29","cust":4910,"usd":1586.91,"tx":13694},
+  {"ds":"2026-01-05","cust":4932,"usd":1667.19,"tx":13857},
+  {"ds":"2026-01-12","cust":4953,"usd":1744.78,"tx":13663},
+  {"ds":"2026-01-19","cust":5080,"usd":1616.52,"tx":14013},
+  {"ds":"2026-01-26","cust":4814,"usd":1411.42,"tx":12829},
+  {"ds":"2026-02-02","cust":4487,"usd":1127.61,"tx":11996},
+  {"ds":"2026-02-09","cust":4303,"usd":1027.18,"tx":11407},
+  {"ds":"2026-02-16","cust":4139,"usd":980.48,"tx":10962},
+  {"ds":"2026-02-23","cust":3759,"usd":866.62,"tx":9466},
+  {"ds":"2026-03-02","cust":3434,"usd":883.75,"tx":8210},
+  {"ds":"2026-03-09","cust":3500,"usd":902.40,"tx":8689},
+  {"ds":"2026-03-16","cust":922,"usd":113.83,"tx":1103}
+];
+
+const MONTHLY_DATA = [
+  {"ds":"2025-11-01","cust":9293,"usd":7139.69,"tx":57611},
+  {"ds":"2025-12-01","cust":10066,"usd":7015.04,"tx":62306},
+  {"ds":"2026-01-01","cust":10162,"usd":7165.54,"tx":60313},
+  {"ds":"2026-02-01","cust":8229,"usd":4063.72,"tx":44307},
+  {"ds":"2026-03-01","cust":5216,"usd":2026.15,"tx":19362}
+];
+
+const NOW = new Date();
+document.getElementById('refresh-ts').textContent =
+  NOW.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
+  ' ' + NOW.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+function countDailyInBucket(bucketStart, gran) {
+  return DAILY_DATA.filter(r => {
+    if (gran === 'weekly') {
+      const bStart = new Date(bucketStart + 'T00:00:00');
+      const bEnd = new Date(bStart); bEnd.setDate(bEnd.getDate() + 7);
+      const d = new Date(r.ds + 'T00:00:00');
+      return d >= bStart && d < bEnd;
+    }
+    return r.ds.slice(0, 7) === bucketStart.slice(0, 7);
+  }).length;
+}
+
+function expectedDays(bucketStart, gran) {
+  if (gran === 'weekly') return 7;
+  const dt = new Date(bucketStart + 'T00:00:00');
+  return new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
+}
+
+function aggregate(gran) {
+  if (gran === 'daily') return DAILY_DATA.map(r => ({ label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: false }));
+  const src = gran === 'weekly' ? WEEKLY_DATA : MONTHLY_DATA;
+  return src.map(r => {
+    const actual = countDailyInBucket(r.ds, gran);
+    const expected = expectedDays(r.ds, gran);
+    return { label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: actual < expected };
+  });
+}
+
+
+function fmtUsd(v) {
+  if (v >= 1000000) return '$' + (v / 1000000).toFixed(1) + 'M';
+  if (v >= 1000) return '$' + (v / 1000).toFixed(1) + 'K';
+  return '$' + v.toFixed(0);
+}
+function fmtNum(v) {
+  if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M';
+  if (v >= 1000) return (v / 1000).toFixed(1) + 'K';
+  return v.toLocaleString();
+}
+function fmtLabel(label, gran) {
+  const dt = new Date(label + 'T00:00:00');
+  if (gran === 'monthly') {
+    return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  }
+  if (gran === 'weekly') {
+    return 'w/o ' + dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+let chartVol, chartCust, chartTx;
+
+function makeChart(canvasId, data, labels, label, color, formatFn, gran, partialFlags) {
+  const ctx = document.getElementById(canvasId).getContext('2d');
+  const showAllLabels = gran === 'weekly' || gran === 'monthly';
+  const bgColors = partialFlags.map(p => p ? color + '40' : color + 'cc');
+  const borderColors = partialFlags.map(p => p ? color + '80' : color);
+  const borderStyles = partialFlags.map(p => p ? [4, 4] : undefined);
+  return new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: label,
+        data: data,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1,
+        borderRadius: 3,
+        maxBarThickness: 40
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end',
+          align: 'end',
+          offset: 2,
+          font: { size: showAllLabels ? 11 : 10, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#1a1a2e',
+          formatter: (v) => formatFn(v),
+          display: function(ctx) {
+            if (showAllLabels) return true;
+            const total = ctx.dataset.data.length;
+            if (total <= 20) return true;
+            return ctx.dataIndex % Math.ceil(total / 20) === 0;
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: '#6b7280', maxRotation: 45, autoSkip: !showAllLabels, maxTicksLimit: showAllLabels ? 50 : 20 }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: '#eef0f3' },
+          ticks: { font: { size: 10 }, color: '#6b7280', callback: (v) => formatFn(v) }
+        }
+      },
+      interaction: { intersect: false, mode: 'index' },
+      animation: { duration: 400 }
+    }
+  });
+}
+
+function updateStats(rows, gran) {
+  const grid = document.getElementById('stats-grid');
+  const totalUsd = rows.reduce((s, r) => s + r.usd, 0);
+  const totalCust = rows.reduce((s, r) => s + r.cust, 0);
+  const totalTx = rows.reduce((s, r) => s + r.tx, 0);
+  const totalDays = DAILY_DATA.length;
+  const avgDailyUsd = totalUsd / totalDays;
+  const avgDailyCust = totalCust / totalDays;
+
+  const complete = rows.filter(r => !r.partial);
+  const latest = complete[complete.length - 1];
+  const prev = complete.length > 1 ? complete[complete.length - 2] : null;
+  const volChg = prev ? ((latest.usd - prev.usd) / prev.usd * 100) : 0;
+  const custChg = prev ? ((latest.cust - prev.cust) / prev.cust * 100) : 0;
+  const latestLabel = fmtLabel(latest.label, gran);
+
+  grid.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Volume</div>
+      <div class="stat-value">${fmtUsd(totalUsd)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">Since Nov 2025</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Transactions</div>
+      <div class="stat-value">${fmtNum(totalTx)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">${totalDays} days</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Avg Daily Volume</div>
+      <div class="stat-value">${fmtUsd(avgDailyUsd)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Latest Period Vol</div>
+      <div class="stat-value">${fmtUsd(latest.usd)}</div>
+      <div class="stat-sub ${volChg >= 0 ? 'up' : 'down'}">${volChg >= 0 ? '+' : ''}${volChg.toFixed(1)}% vs prior</div>
+      <div class="stat-sub" style="color: var(--text-muted)">${latestLabel}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Latest Period Cust</div>
+      <div class="stat-value">${fmtNum(latest.cust)}</div>
+      <div class="stat-sub ${custChg >= 0 ? 'up' : 'down'}">${custChg >= 0 ? '+' : ''}${custChg.toFixed(1)}% vs prior</div>
+      <div class="stat-sub" style="color: var(--text-muted)">${latestLabel}</div>
+    </div>
+  `;
+}
+
+function updateTable(rows, gran) {
+  const tbody = document.querySelector('#data-table tbody');
+  const reversed = [...rows].reverse();
+
+  let html = '';
+  reversed.forEach((r, i) => {
+    const prev = i < reversed.length - 1 ? reversed[i + 1] : null;
+    const pctVol = prev ? ((r.usd - prev.usd) / prev.usd * 100) : 0;
+    const pctClass = pctVol >= 0 ? 'pct-up' : 'pct-down';
+    const pctStr = prev ? `<span class="${pctClass}">${pctVol >= 0 ? '+' : ''}${pctVol.toFixed(1)}%</span>` : '—';
+    const partialTag = r.partial ? ' <span style="font-size:0.65rem;color:var(--text-muted);font-style:italic">(partial)</span>' : '';
+    html += `<tr${r.partial ? ' style="opacity:0.55"' : ''}>
+      <td>${fmtLabel(r.label, gran)}${partialTag}</td>
+      <td>${fmtUsd(r.usd)}</td>
+      <td>${fmtNum(r.cust)}</td>
+      <td>${fmtNum(r.tx)}</td>
+      <td>${pctStr}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function render(gran) {
+  const rows = aggregate(gran);
+  const labels = rows.map(r => fmtLabel(r.label, gran));
+  const volData = rows.map(r => r.usd);
+  const custData = rows.map(r => r.cust);
+  const txData = rows.map(r => r.tx);
+
+  if (chartVol) chartVol.destroy();
+  if (chartCust) chartCust.destroy();
+  if (chartTx) chartTx.destroy();
+
+  const partials = rows.map(r => r.partial);
+  chartVol = makeChart('chart-volume', volData, labels, 'Volume (USD)', '#1a73e8', fmtUsd, gran, partials);
+  chartCust = makeChart('chart-customers', custData, labels, 'Customers', '#16a34a', fmtNum, gran, partials);
+  chartTx = makeChart('chart-tx', txData, labels, 'Transactions', '#f7931a', fmtNum, gran, partials);
+
+  updateStats(rows, gran);
+  updateTable(rows, gran);
+}
+
+document.getElementById('granularity-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('.toggle-btn');
+  if (!btn) return;
+  document.querySelectorAll('#granularity-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  render(btn.dataset.gran);
+});
+
+render('daily');
+</script>
+</body>
+</html>
