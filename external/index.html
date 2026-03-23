@@ -663,7 +663,7 @@ function aggregatePayoutByGran(dailyArr, gran) {
       const diff = day === 0 ? -6 : 1 - day;
       const monday = new Date(dt);
       monday.setDate(dt.getDate() + diff);
-      key = monday.toISOString().slice(0, 10);
+      key = monday.getFullYear() + '-' + String(monday.getMonth()+1).padStart(2,'0') + '-' + String(monday.getDate()).padStart(2,'0');
     } else {
       key = r.ds.slice(0, 7) + '-01';
     }
