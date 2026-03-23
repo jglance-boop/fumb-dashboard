@@ -261,6 +261,7 @@
     ON d.payment_hash = p.payment_hash
   WHERE d.latest_state = 'RECEIVED'
     AND p.partner = 'FUMB'
+    AND d.received_at::DATE >= '2026-03-17'
   GROUP BY 1
 ),
 first_buy_after_deposit AS (
@@ -1845,29 +1846,31 @@ const BUY_MONTHLY_ZBD_SDK = [
 ];
 
 const PAYOUT_FUMB = [
-  {"ds":"2026-03-17","new":44,"cum":44,"payout":88.0},
-  {"ds":"2026-03-18","new":37,"cum":81,"payout":162.0},
-  {"ds":"2026-03-19","new":66,"cum":147,"payout":294.0},
-  {"ds":"2026-03-20","new":41,"cum":188,"payout":376.0},
-  {"ds":"2026-03-21","new":46,"cum":234,"payout":468.0},
-  {"ds":"2026-03-22","new":27,"cum":261,"payout":522.0}
+  {"ds":"2026-03-17","new":28,"cum":28,"payout":56.0},
+  {"ds":"2026-03-18","new":32,"cum":60,"payout":120.0},
+  {"ds":"2026-03-19","new":32,"cum":92,"payout":184.0},
+  {"ds":"2026-03-20","new":35,"cum":127,"payout":254.0},
+  {"ds":"2026-03-21","new":32,"cum":159,"payout":318.0},
+  {"ds":"2026-03-22","new":22,"cum":181,"payout":362.0}
 ];
 const PAYOUT_THNDR = [
-  {"ds":"2026-03-17","new":4,"cum":4,"payout":8.0},
-  {"ds":"2026-03-19","new":2,"cum":6,"payout":12.0},
-  {"ds":"2026-03-20","new":2,"cum":8,"payout":16.0},
-  {"ds":"2026-03-21","new":4,"cum":12,"payout":24.0}
+  {"ds":"2026-03-17","new":2,"cum":2,"payout":4.0},
+  {"ds":"2026-03-18","new":1,"cum":3,"payout":6.0},
+  {"ds":"2026-03-19","new":2,"cum":5,"payout":10.0},
+  {"ds":"2026-03-20","new":5,"cum":10,"payout":20.0},
+  {"ds":"2026-03-21","new":3,"cum":13,"payout":26.0},
+  {"ds":"2026-03-22","new":3,"cum":16,"payout":32.0}
 ];
 const PAYOUT_ZBD_App = [
-  {"ds":"2026-03-17","new":48,"cum":48,"payout":96.0},
-  {"ds":"2026-03-18","new":45,"cum":93,"payout":186.0},
-  {"ds":"2026-03-19","new":56,"cum":149,"payout":298.0},
-  {"ds":"2026-03-20","new":38,"cum":187,"payout":374.0},
-  {"ds":"2026-03-21","new":25,"cum":212,"payout":424.0},
-  {"ds":"2026-03-22","new":26,"cum":238,"payout":476.0}
+  {"ds":"2026-03-17","new":2,"cum":2,"payout":4.0},
+  {"ds":"2026-03-18","new":4,"cum":6,"payout":12.0},
+  {"ds":"2026-03-20","new":3,"cum":9,"payout":18.0},
+  {"ds":"2026-03-21","new":3,"cum":12,"payout":24.0},
+  {"ds":"2026-03-22","new":4,"cum":16,"payout":32.0}
 ];
 const PAYOUT_ZBD_SDK = [
-
+  {"ds":"2026-03-17","new":1,"cum":1,"payout":2.0},
+  {"ds":"2026-03-18","new":1,"cum":2,"payout":4.0}
 ];
 
 
