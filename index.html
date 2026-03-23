@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cash App x FUMB Lightning Deposits</title>
+  <title>Cash App Lightning Deposits</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <style>
@@ -77,6 +77,12 @@
     .pct-up { color: var(--green); font-weight: 600; }
     .pct-down { color: var(--red); font-weight: 600; }
 
+    .chart-legend { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; user-select: none; background: var(--surface-2); border: 1px solid var(--border); border-radius: 16px; padding: 3px 10px 3px 7px; transition: all 0.2s; }
+    .legend-item:hover { border-color: #aab0ba; }
+    .legend-item.dimmed { opacity: 0.35; }
+    .legend-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
     footer { text-align: center; padding: 24px 0 12px; color: var(--text-muted); font-size: 0.76rem; line-height: 1.8; }
 
     @media (max-width: 800px) { .chart-canvas-container { height: 260px; } }
@@ -86,7 +92,7 @@
 <div class="container">
 
   <div class="top-bar">
-    <h1>Cash App x FUMB Lightning Deposits</h1>
+    <h1>Cash App Lightning Deposits</h1>
   </div>
 
   <div class="meta-bar">
@@ -102,6 +108,15 @@
         <button class="toggle-btn" data-gran="monthly">Monthly</button>
       </div>
     </div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Range</span>
+      <div class="toggle-group" id="range-toggle">
+        <button class="toggle-btn" data-range="12">12W</button>
+        <button class="toggle-btn" data-range="26">26W</button>
+        <button class="toggle-btn" data-range="52">1Y</button>
+        <button class="toggle-btn active" data-range="0">All</button>
+      </div>
+    </div>
   </div>
 
   <div class="stats-grid" id="stats-grid"></div>
@@ -114,6 +129,7 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-volume"></canvas></div>
+    <div class="chart-legend" id="legend-ln-vol"></div>
   </div>
 
   <div class="chart-wrapper">
@@ -124,6 +140,7 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-customers"></canvas></div>
+    <div class="chart-legend" id="legend-ln-cust"></div>
   </div>
 
   <div class="chart-wrapper">
@@ -134,10 +151,11 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-tx"></canvas></div>
+    <div class="chart-legend" id="legend-ln-tx"></div>
   </div>
 
   <div class="data-table-wrap">
-    <h3>Lightning Deposits — Data Table</h3>
+    <h3>Lightning Deposits — FUMB Data Table</h3>
     <div style="max-height: 480px; overflow-y: auto;">
       <table class="data-tbl" id="data-table">
         <thead><tr><th>Period</th><th>Volume (USD)</th><th>Customers</th><th>Transactions</th><th>Vol PoP</th></tr></thead>
@@ -147,8 +165,8 @@
   </div>
 
   <div style="margin: 44px 0 10px; padding-top: 28px; border-top: 2px solid var(--border);">
-    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">Bitcoin Buy Activity — FUMB Cohort</h2>
-    <p style="font-size: 0.82rem; color: var(--blue-dark); font-style: italic; font-weight: 600;">Customers who have ever received a FUMB lightning deposit (Nov 2025+)</p>
+    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">Bitcoin Buy Activity — Partner Cohorts</h2>
+    <p style="font-size: 0.82rem; color: var(--blue-dark); font-style: italic; font-weight: 600;">Customers who have ever received a partner lightning deposit (Nov 2025+)</p>
   </div>
 
   <div class="chart-wrapper">
@@ -159,6 +177,7 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-buy-cust"></canvas></div>
+    <div class="chart-legend" id="legend-buy-cust"></div>
   </div>
 
   <div class="chart-wrapper">
@@ -169,6 +188,7 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-buy-tx"></canvas></div>
+    <div class="chart-legend" id="legend-buy-tx"></div>
   </div>
 
   <div class="chart-wrapper">
@@ -179,10 +199,11 @@
       </div>
     </div>
     <div class="chart-canvas-container"><canvas id="chart-buy-vol"></canvas></div>
+    <div class="chart-legend" id="legend-buy-vol"></div>
   </div>
 
   <div class="data-table-wrap">
-    <h3>Bitcoin Buy — Data Table</h3>
+    <h3>Bitcoin Buy — FUMB Data Table</h3>
     <div style="max-height: 480px; overflow-y: auto;">
       <table class="data-tbl" id="buy-data-table">
         <thead><tr><th>Period</th><th>Buy GTV</th><th>Buyers</th><th>Transactions</th><th>GTV PoP</th></tr></thead>
@@ -191,20 +212,97 @@
     </div>
   </div>
 
-  <footer>Cash App x FUMB Lightning Deposits &middot; Data from app_cash.bitcoin</footer>
+  <div style="margin: 44px 0 10px; padding-top: 28px; border-top: 2px solid var(--border);">
+    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">Partner Payout Tracker</h2>
+    <p style="font-size: 0.82rem; color: var(--blue-dark); font-style: italic; font-weight: 600;">$2 per unique customer who receives a lightning deposit and subsequently makes a BTC buy &middot; Program start: Mar 17, 2026</p>
+  </div>
+
+  <div class="stats-grid" id="payout-stats-grid"></div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title" id="payout-cust-title">New Qualifying Customers (Daily)</div>
+        <div class="chart-subtitle">First-time converters: LN deposit &rarr; BTC buy (each customer counted once, per partner)</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-payout-cust"></canvas></div>
+    <div class="chart-legend" id="legend-payout-cust"></div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Cumulative Payout by Partner</div>
+        <div class="chart-subtitle">Running total of $2 &times; qualifying customers</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-payout-cum"></canvas></div>
+    <div class="chart-legend" id="legend-payout-cum"></div>
+  </div>
+
+  <div class="data-table-wrap">
+    <h3>Payout Tracker — Data Table</h3>
+    <div style="max-height: 480px; overflow-y: auto;">
+      <table class="data-tbl" id="payout-data-table">
+        <thead><tr><th>Date</th><th>FUMB New</th><th>THNDR New</th><th>ZBD-App New</th><th>ZBD-SDK New</th><th>Cum Total</th><th>Cum Payout</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <details style="margin-bottom: 28px;">
+    <summary style="cursor:pointer; font-size:0.82rem; font-weight:600; color:var(--text-muted); padding:8px 0;">View Payout Query</summary>
+    <pre style="background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:16px; font-size:0.75rem; line-height:1.6; overflow-x:auto; margin-top:8px; color:var(--text); font-family:'SF Mono',Monaco,Consolas,monospace;">WITH fumb_first_deposit AS (
+  SELECT d.customer_token,
+         MIN(d.received_at::DATE) AS first_deposit_date
+  FROM app_cash.bitcoin.lightning_deposit_summary d
+  JOIN app_cash.bitcoin.lnurl_receive_invoice_generation_event p
+    ON d.payment_hash = p.payment_hash
+  WHERE d.latest_state = 'RECEIVED'
+    AND p.partner = 'FUMB'
+  GROUP BY 1
+),
+first_buy_after_deposit AS (
+  SELECT t.customer_token,
+         MIN(t.latest_occurred_at::DATE) AS first_buy_date
+  FROM app_cash.app.bitcoin_transactions_summary t
+  JOIN fumb_first_deposit fd
+    ON t.customer_token = fd.customer_token
+  WHERE t.latest_state = 'SETTLED'
+    AND t.revised_type = 'Buy'
+    AND NOT (t.revised_type = 'Buy' AND t.subtype = 'Round Up')
+    AND t.latest_occurred_at::DATE >= fd.first_deposit_date
+  GROUP BY 1
+)
+SELECT first_buy_date AS ds,
+       COUNT(*)       AS new_customers,
+       SUM(COUNT(*)) OVER (ORDER BY first_buy_date) AS cumulative_customers,
+       SUM(COUNT(*)) OVER (ORDER BY first_buy_date) * 2.0 AS cumulative_payout_usd
+FROM first_buy_after_deposit
+WHERE first_buy_date >= '2026-03-17'
+  AND first_buy_date &lt; CURRENT_DATE
+GROUP BY 1
+ORDER BY 1</pre>
+  </details>
+
+  <footer>Cash App Lightning Deposits &middot; Data from app_cash.bitcoin</footer>
 </div>
 
 <script>
-const DAILY_DATA = [
+const PARTNERS = ['FUMB','THNDR','ZBD-App','ZBD-SDK'];
+const PARTNER_COLORS = {FUMB:'#1a73e8', THNDR:'#f7931a', 'ZBD-App':'#7c3aed', 'ZBD-SDK':'#10b981'};
+
+const LN_DAILY_FUMB = [
   {"ds":"2025-11-01","cust":1383,"usd":254.24,"tx":1739},
   {"ds":"2025-11-02","cust":1472,"usd":257.15,"tx":1847},
   {"ds":"2025-11-03","cust":1686,"usd":293.48,"tx":2092},
-  {"ds":"2025-11-04","cust":1543,"usd":258.20,"tx":1967},
+  {"ds":"2025-11-04","cust":1543,"usd":258.2,"tx":1967},
   {"ds":"2025-11-05","cust":1505,"usd":256.56,"tx":1886},
   {"ds":"2025-11-06","cust":1465,"usd":240.78,"tx":1821},
   {"ds":"2025-11-07","cust":1590,"usd":260.71,"tx":1975},
   {"ds":"2025-11-08","cust":1446,"usd":244.13,"tx":1820},
-  {"ds":"2025-11-09","cust":1526,"usd":250.70,"tx":1917},
+  {"ds":"2025-11-09","cust":1526,"usd":250.7,"tx":1917},
   {"ds":"2025-11-10","cust":1661,"usd":287.44,"tx":2038},
   {"ds":"2025-11-11","cust":1450,"usd":237.06,"tx":1757},
   {"ds":"2025-11-12","cust":1481,"usd":253.22,"tx":1882},
@@ -218,7 +316,7 @@ const DAILY_DATA = [
   {"ds":"2025-11-20","cust":1623,"usd":239.06,"tx":1977},
   {"ds":"2025-11-21","cust":1624,"usd":214.54,"tx":1999},
   {"ds":"2025-11-22","cust":1462,"usd":189.47,"tx":1819},
-  {"ds":"2025-11-23","cust":1632,"usd":225.70,"tx":2101},
+  {"ds":"2025-11-23","cust":1632,"usd":225.7,"tx":2101},
   {"ds":"2025-11-24","cust":1680,"usd":238.08,"tx":2060},
   {"ds":"2025-11-25","cust":1528,"usd":213.07,"tx":1920},
   {"ds":"2025-11-26","cust":1492,"usd":213.82,"tx":1876},
@@ -230,13 +328,13 @@ const DAILY_DATA = [
   {"ds":"2025-12-02","cust":1554,"usd":216.79,"tx":1953},
   {"ds":"2025-12-03","cust":1492,"usd":226.07,"tx":2044},
   {"ds":"2025-12-04","cust":1729,"usd":257.57,"tx":2166},
-  {"ds":"2025-12-05","cust":1631,"usd":234.00,"tx":2046},
+  {"ds":"2025-12-05","cust":1631,"usd":234.0,"tx":2046},
   {"ds":"2025-12-06","cust":1493,"usd":212.16,"tx":1923},
   {"ds":"2025-12-07","cust":1670,"usd":233.05,"tx":2141},
   {"ds":"2025-12-08","cust":1744,"usd":247.39,"tx":2193},
   {"ds":"2025-12-09","cust":1597,"usd":222.56,"tx":1923},
   {"ds":"2025-12-10","cust":1464,"usd":214.64,"tx":1780},
-  {"ds":"2025-12-11","cust":1706,"usd":245.60,"tx":2130},
+  {"ds":"2025-12-11","cust":1706,"usd":245.6,"tx":2130},
   {"ds":"2025-12-12","cust":1652,"usd":235.12,"tx":2051},
   {"ds":"2025-12-13","cust":1523,"usd":210.68,"tx":1920},
   {"ds":"2025-12-14","cust":1578,"usd":226.31,"tx":2007},
@@ -244,7 +342,7 @@ const DAILY_DATA = [
   {"ds":"2025-12-16","cust":1644,"usd":219.11,"tx":2025},
   {"ds":"2025-12-17","cust":1594,"usd":226.74,"tx":2008},
   {"ds":"2025-12-18","cust":1697,"usd":236.61,"tx":2116},
-  {"ds":"2025-12-19","cust":1615,"usd":214.60,"tx":2012},
+  {"ds":"2025-12-19","cust":1615,"usd":214.6,"tx":2012},
   {"ds":"2025-12-20","cust":1518,"usd":207.64,"tx":1962},
   {"ds":"2025-12-21","cust":1542,"usd":222.31,"tx":2051},
   {"ds":"2025-12-22","cust":1617,"usd":230.76,"tx":2010},
@@ -262,24 +360,24 @@ const DAILY_DATA = [
   {"ds":"2026-01-03","cust":1549,"usd":220.16,"tx":1928},
   {"ds":"2026-01-04","cust":1647,"usd":245.56,"tx":2052},
   {"ds":"2026-01-05","cust":1727,"usd":268.04,"tx":2157},
-  {"ds":"2026-01-06","cust":1556,"usd":239.00,"tx":1948},
+  {"ds":"2026-01-06","cust":1556,"usd":239.0,"tx":1948},
   {"ds":"2026-01-07","cust":1517,"usd":230.73,"tx":1899},
   {"ds":"2026-01-08","cust":1591,"usd":241.13,"tx":1960},
   {"ds":"2026-01-09","cust":1606,"usd":229.41,"tx":1991},
-  {"ds":"2026-01-10","cust":1523,"usd":224.20,"tx":1903},
+  {"ds":"2026-01-10","cust":1523,"usd":224.2,"tx":1903},
   {"ds":"2026-01-11","cust":1613,"usd":234.68,"tx":1999},
   {"ds":"2026-01-12","cust":1663,"usd":257.83,"tx":2022},
   {"ds":"2026-01-13","cust":1558,"usd":228.09,"tx":1932},
   {"ds":"2026-01-14","cust":1590,"usd":254.38,"tx":1947},
   {"ds":"2026-01-15","cust":1667,"usd":267.25,"tx":2046},
   {"ds":"2026-01-16","cust":1578,"usd":248.79,"tx":1901},
-  {"ds":"2026-01-17","cust":1470,"usd":231.70,"tx":1814},
+  {"ds":"2026-01-17","cust":1470,"usd":231.7,"tx":1814},
   {"ds":"2026-01-18","cust":1613,"usd":256.74,"tx":2001},
   {"ds":"2026-01-19","cust":1747,"usd":257.42,"tx":2170},
   {"ds":"2026-01-20","cust":1615,"usd":235.42,"tx":2029},
   {"ds":"2026-01-21","cust":1626,"usd":238.95,"tx":2026},
   {"ds":"2026-01-22","cust":1678,"usd":249.98,"tx":2064},
-  {"ds":"2026-01-23","cust":1579,"usd":222.00,"tx":1952},
+  {"ds":"2026-01-23","cust":1579,"usd":222.0,"tx":1952},
   {"ds":"2026-01-24","cust":1437,"usd":193.77,"tx":1772},
   {"ds":"2026-01-25","cust":1589,"usd":218.98,"tx":2000},
   {"ds":"2026-01-26","cust":1567,"usd":223.78,"tx":1930},
@@ -288,23 +386,23 @@ const DAILY_DATA = [
   {"ds":"2026-01-29","cust":1556,"usd":223.53,"tx":1923},
   {"ds":"2026-01-30","cust":1400,"usd":177.04,"tx":1713},
   {"ds":"2026-01-31","cust":1399,"usd":177.46,"tx":1747},
-  {"ds":"2026-02-01","cust":1492,"usd":188.00,"tx":1836},
+  {"ds":"2026-02-01","cust":1492,"usd":188.0,"tx":1836},
   {"ds":"2026-02-02","cust":1550,"usd":194.62,"tx":1904},
   {"ds":"2026-02-03","cust":1395,"usd":160.79,"tx":1709},
   {"ds":"2026-02-04","cust":1311,"usd":159.56,"tx":1614},
-  {"ds":"2026-02-05","cust":1468,"usd":162.60,"tx":1778},
+  {"ds":"2026-02-05","cust":1468,"usd":162.6,"tx":1778},
   {"ds":"2026-02-06","cust":1375,"usd":145.41,"tx":1696},
   {"ds":"2026-02-07","cust":1306,"usd":145.34,"tx":1567},
   {"ds":"2026-02-08","cust":1374,"usd":159.29,"tx":1728},
-  {"ds":"2026-02-09","cust":1376,"usd":155.10,"tx":1666},
+  {"ds":"2026-02-09","cust":1376,"usd":155.1,"tx":1666},
   {"ds":"2026-02-10","cust":1267,"usd":137.41,"tx":1529},
   {"ds":"2026-02-11","cust":1316,"usd":142.22,"tx":1625},
-  {"ds":"2026-02-12","cust":1391,"usd":151.90,"tx":1765},
+  {"ds":"2026-02-12","cust":1391,"usd":151.9,"tx":1765},
   {"ds":"2026-02-13","cust":1370,"usd":151.37,"tx":1664},
   {"ds":"2026-02-14","cust":1231,"usd":137.61,"tx":1495},
   {"ds":"2026-02-15","cust":1309,"usd":151.57,"tx":1663},
   {"ds":"2026-02-16","cust":1414,"usd":152.67,"tx":1750},
-  {"ds":"2026-02-17","cust":1281,"usd":138.60,"tx":1600},
+  {"ds":"2026-02-17","cust":1281,"usd":138.6,"tx":1600},
   {"ds":"2026-02-18","cust":1278,"usd":136.49,"tx":1575},
   {"ds":"2026-02-19","cust":1307,"usd":145.16,"tx":1622},
   {"ds":"2026-02-20","cust":1258,"usd":136.06,"tx":1456},
@@ -318,11 +416,11 @@ const DAILY_DATA = [
   {"ds":"2026-02-28","cust":1000,"usd":108.87,"tx":1193},
   {"ds":"2026-03-01","cust":1155,"usd":126.17,"tx":1360},
   {"ds":"2026-03-02","cust":1041,"usd":122.51,"tx":1185},
-  {"ds":"2026-03-03","cust":746,"usd":93.40,"tx":843},
+  {"ds":"2026-03-03","cust":746,"usd":93.4,"tx":843},
   {"ds":"2026-03-04","cust":1023,"usd":135.67,"tx":1163},
   {"ds":"2026-03-05","cust":1209,"usd":160.24,"tx":1408},
   {"ds":"2026-03-06","cust":1061,"usd":126.85,"tx":1232},
-  {"ds":"2026-03-07","cust":1004,"usd":119.60,"tx":1169},
+  {"ds":"2026-03-07","cust":1004,"usd":119.6,"tx":1169},
   {"ds":"2026-03-08","cust":1041,"usd":125.48,"tx":1210},
   {"ds":"2026-03-09","cust":1108,"usd":130.51,"tx":1278},
   {"ds":"2026-03-10","cust":1002,"usd":117.56,"tx":1177},
@@ -332,17 +430,285 @@ const DAILY_DATA = [
   {"ds":"2026-03-14","cust":948,"usd":116.91,"tx":1126},
   {"ds":"2026-03-15","cust":1064,"usd":138.77,"tx":1280},
   {"ds":"2026-03-16","cust":922,"usd":113.83,"tx":1103},
-  {"ds":"2026-03-17","cust":935,"usd":113.14,"tx":1163}
+  {"ds":"2026-03-17","cust":935,"usd":113.14,"tx":1163},
+  {"ds":"2026-03-18","cust":1030,"usd":136.53,"tx":1255},
+  {"ds":"2026-03-19","cust":1059,"usd":128.53,"tx":1256},
+  {"ds":"2026-03-20","cust":994,"usd":122.27,"tx":1188},
+  {"ds":"2026-03-21","cust":938,"usd":121.04,"tx":1177},
+  {"ds":"2026-03-22","cust":1011,"usd":124.83,"tx":1233}
+];
+const LN_DAILY_THNDR = [
+  {"ds":"2025-11-01","cust":87,"usd":1.86,"tx":165},
+  {"ds":"2025-11-02","cust":77,"usd":1.57,"tx":154},
+  {"ds":"2025-11-03","cust":81,"usd":3.52,"tx":141},
+  {"ds":"2025-11-04","cust":87,"usd":1.16,"tx":151},
+  {"ds":"2025-11-05","cust":83,"usd":3.22,"tx":144},
+  {"ds":"2025-11-06","cust":66,"usd":1.66,"tx":146},
+  {"ds":"2025-11-07","cust":72,"usd":2.02,"tx":133},
+  {"ds":"2025-11-08","cust":78,"usd":1.87,"tx":151},
+  {"ds":"2025-11-09","cust":76,"usd":2.35,"tx":131},
+  {"ds":"2025-11-10","cust":69,"usd":1.36,"tx":147},
+  {"ds":"2025-11-11","cust":70,"usd":1.92,"tx":129},
+  {"ds":"2025-11-12","cust":75,"usd":1.14,"tx":128},
+  {"ds":"2025-11-13","cust":73,"usd":3.07,"tx":139},
+  {"ds":"2025-11-14","cust":79,"usd":2.29,"tx":153},
+  {"ds":"2025-11-15","cust":50,"usd":1.57,"tx":101},
+  {"ds":"2025-11-16","cust":68,"usd":1.94,"tx":123},
+  {"ds":"2025-11-17","cust":83,"usd":2.43,"tx":134},
+  {"ds":"2025-11-18","cust":66,"usd":1.8,"tx":118},
+  {"ds":"2025-11-19","cust":62,"usd":0.74,"tx":108},
+  {"ds":"2025-11-20","cust":78,"usd":1.22,"tx":146},
+  {"ds":"2025-11-21","cust":75,"usd":2.42,"tx":114},
+  {"ds":"2025-11-22","cust":64,"usd":0.82,"tx":113},
+  {"ds":"2025-11-23","cust":56,"usd":1.52,"tx":131},
+  {"ds":"2025-11-24","cust":67,"usd":1.47,"tx":122},
+  {"ds":"2025-11-25","cust":69,"usd":1.78,"tx":111},
+  {"ds":"2025-11-26","cust":58,"usd":0.95,"tx":101},
+  {"ds":"2025-11-27","cust":68,"usd":1.85,"tx":132},
+  {"ds":"2025-11-28","cust":73,"usd":1.08,"tx":120},
+  {"ds":"2025-11-29","cust":60,"usd":0.76,"tx":118},
+  {"ds":"2025-11-30","cust":63,"usd":1.32,"tx":137},
+  {"ds":"2025-12-01","cust":70,"usd":1.46,"tx":155},
+  {"ds":"2025-12-02","cust":64,"usd":1.57,"tx":115},
+  {"ds":"2025-12-03","cust":62,"usd":1.24,"tx":104},
+  {"ds":"2025-12-04","cust":61,"usd":1.12,"tx":92},
+  {"ds":"2025-12-05","cust":66,"usd":1.87,"tx":106},
+  {"ds":"2025-12-06","cust":58,"usd":1.17,"tx":107},
+  {"ds":"2025-12-07","cust":55,"usd":1.71,"tx":104},
+  {"ds":"2025-12-08","cust":67,"usd":0.92,"tx":121},
+  {"ds":"2025-12-09","cust":53,"usd":1.56,"tx":85},
+  {"ds":"2025-12-10","cust":57,"usd":1.32,"tx":106},
+  {"ds":"2025-12-11","cust":49,"usd":0.6,"tx":86},
+  {"ds":"2025-12-12","cust":53,"usd":1.29,"tx":93},
+  {"ds":"2025-12-13","cust":56,"usd":0.95,"tx":78},
+  {"ds":"2025-12-14","cust":69,"usd":2.19,"tx":138},
+  {"ds":"2025-12-15","cust":52,"usd":0.88,"tx":96},
+  {"ds":"2025-12-16","cust":63,"usd":1.45,"tx":119},
+  {"ds":"2025-12-17","cust":78,"usd":1.14,"tx":125},
+  {"ds":"2025-12-18","cust":71,"usd":2.15,"tx":112},
+  {"ds":"2025-12-19","cust":47,"usd":0.61,"tx":87},
+  {"ds":"2025-12-20","cust":54,"usd":1.0,"tx":102},
+  {"ds":"2025-12-21","cust":70,"usd":2.14,"tx":117},
+  {"ds":"2025-12-22","cust":57,"usd":1.67,"tx":98},
+  {"ds":"2025-12-23","cust":65,"usd":1.22,"tx":100},
+  {"ds":"2025-12-24","cust":52,"usd":1.65,"tx":104},
+  {"ds":"2025-12-25","cust":59,"usd":0.75,"tx":76},
+  {"ds":"2025-12-26","cust":55,"usd":1.92,"tx":88},
+  {"ds":"2025-12-27","cust":57,"usd":1.8,"tx":114},
+  {"ds":"2025-12-28","cust":68,"usd":2.44,"tx":111},
+  {"ds":"2025-12-29","cust":64,"usd":1.62,"tx":122},
+  {"ds":"2025-12-30","cust":48,"usd":1.48,"tx":102},
+  {"ds":"2025-12-31","cust":60,"usd":1.15,"tx":103},
+  {"ds":"2026-01-01","cust":58,"usd":1.62,"tx":110},
+  {"ds":"2026-01-02","cust":68,"usd":1.29,"tx":117},
+  {"ds":"2026-01-03","cust":58,"usd":0.9,"tx":119},
+  {"ds":"2026-01-04","cust":65,"usd":2.82,"tx":122},
+  {"ds":"2026-01-05","cust":73,"usd":1.92,"tx":148},
+  {"ds":"2026-01-06","cust":66,"usd":1.02,"tx":129},
+  {"ds":"2026-01-07","cust":52,"usd":2.17,"tx":104},
+  {"ds":"2026-01-08","cust":55,"usd":0.83,"tx":124},
+  {"ds":"2026-01-09","cust":59,"usd":1.31,"tx":97},
+  {"ds":"2026-01-10","cust":49,"usd":1.48,"tx":91},
+  {"ds":"2026-01-11","cust":59,"usd":1.12,"tx":100},
+  {"ds":"2026-01-12","cust":78,"usd":1.92,"tx":146},
+  {"ds":"2026-01-13","cust":55,"usd":2.21,"tx":98},
+  {"ds":"2026-01-14","cust":53,"usd":1.38,"tx":117},
+  {"ds":"2026-01-15","cust":59,"usd":2.34,"tx":104},
+  {"ds":"2026-01-16","cust":52,"usd":1.38,"tx":89},
+  {"ds":"2026-01-17","cust":62,"usd":1.43,"tx":124},
+  {"ds":"2026-01-18","cust":50,"usd":1.84,"tx":79},
+  {"ds":"2026-01-19","cust":55,"usd":1.67,"tx":92},
+  {"ds":"2026-01-20","cust":53,"usd":1.28,"tx":109},
+  {"ds":"2026-01-21","cust":57,"usd":1.23,"tx":112},
+  {"ds":"2026-01-22","cust":58,"usd":0.99,"tx":91},
+  {"ds":"2026-01-23","cust":62,"usd":2.29,"tx":115},
+  {"ds":"2026-01-24","cust":55,"usd":1.22,"tx":133},
+  {"ds":"2026-01-25","cust":65,"usd":1.9,"tx":125},
+  {"ds":"2026-01-26","cust":65,"usd":1.69,"tx":142},
+  {"ds":"2026-01-27","cust":51,"usd":3.01,"tx":123},
+  {"ds":"2026-01-28","cust":54,"usd":1.38,"tx":152},
+  {"ds":"2026-01-29","cust":46,"usd":0.9,"tx":114},
+  {"ds":"2026-01-30","cust":49,"usd":2.1,"tx":123},
+  {"ds":"2026-01-31","cust":59,"usd":1.53,"tx":135},
+  {"ds":"2026-02-01","cust":67,"usd":1.48,"tx":145},
+  {"ds":"2026-02-02","cust":51,"usd":1.71,"tx":95},
+  {"ds":"2026-02-03","cust":51,"usd":1.17,"tx":116},
+  {"ds":"2026-02-04","cust":51,"usd":1.06,"tx":121},
+  {"ds":"2026-02-05","cust":48,"usd":0.76,"tx":120},
+  {"ds":"2026-02-06","cust":61,"usd":1.03,"tx":136},
+  {"ds":"2026-02-07","cust":60,"usd":0.66,"tx":109},
+  {"ds":"2026-02-08","cust":64,"usd":1.79,"tx":128},
+  {"ds":"2026-02-09","cust":57,"usd":1.73,"tx":129},
+  {"ds":"2026-02-10","cust":46,"usd":0.38,"tx":97},
+  {"ds":"2026-02-11","cust":57,"usd":0.92,"tx":94},
+  {"ds":"2026-02-12","cust":57,"usd":0.79,"tx":106},
+  {"ds":"2026-02-13","cust":61,"usd":1.03,"tx":138},
+  {"ds":"2026-02-14","cust":51,"usd":0.43,"tx":91},
+  {"ds":"2026-02-15","cust":51,"usd":1.08,"tx":113},
+  {"ds":"2026-02-16","cust":54,"usd":1.47,"tx":117},
+  {"ds":"2026-02-17","cust":65,"usd":2.1,"tx":113},
+  {"ds":"2026-02-18","cust":49,"usd":0.7,"tx":111},
+  {"ds":"2026-02-19","cust":51,"usd":0.72,"tx":108},
+  {"ds":"2026-02-20","cust":54,"usd":1.08,"tx":106},
+  {"ds":"2026-02-21","cust":47,"usd":1.0,"tx":106},
+  {"ds":"2026-02-22","cust":47,"usd":1.0,"tx":109},
+  {"ds":"2026-02-23","cust":47,"usd":0.94,"tx":96},
+  {"ds":"2026-02-24","cust":57,"usd":0.58,"tx":122},
+  {"ds":"2026-02-25","cust":54,"usd":1.15,"tx":112},
+  {"ds":"2026-02-26","cust":55,"usd":1.04,"tx":113},
+  {"ds":"2026-02-27","cust":51,"usd":0.8,"tx":94},
+  {"ds":"2026-02-28","cust":51,"usd":0.93,"tx":93},
+  {"ds":"2026-03-01","cust":54,"usd":1.24,"tx":96},
+  {"ds":"2026-03-02","cust":42,"usd":0.46,"tx":104},
+  {"ds":"2026-03-03","cust":51,"usd":0.92,"tx":124},
+  {"ds":"2026-03-04","cust":49,"usd":0.61,"tx":117},
+  {"ds":"2026-03-05","cust":55,"usd":2.02,"tx":113},
+  {"ds":"2026-03-06","cust":48,"usd":0.47,"tx":90},
+  {"ds":"2026-03-07","cust":45,"usd":0.82,"tx":105},
+  {"ds":"2026-03-08","cust":50,"usd":0.72,"tx":97},
+  {"ds":"2026-03-09","cust":48,"usd":0.64,"tx":109},
+  {"ds":"2026-03-10","cust":52,"usd":0.8,"tx":107},
+  {"ds":"2026-03-11","cust":44,"usd":0.56,"tx":118},
+  {"ds":"2026-03-12","cust":51,"usd":1.15,"tx":124},
+  {"ds":"2026-03-13","cust":46,"usd":0.61,"tx":114},
+  {"ds":"2026-03-14","cust":53,"usd":1.42,"tx":118},
+  {"ds":"2026-03-15","cust":53,"usd":1.89,"tx":113},
+  {"ds":"2026-03-16","cust":44,"usd":0.84,"tx":112},
+  {"ds":"2026-03-17","cust":39,"usd":0.49,"tx":90},
+  {"ds":"2026-03-18","cust":50,"usd":0.6,"tx":92},
+  {"ds":"2026-03-19","cust":35,"usd":0.57,"tx":84},
+  {"ds":"2026-03-20","cust":51,"usd":1.59,"tx":86},
+  {"ds":"2026-03-21","cust":40,"usd":1.05,"tx":74},
+  {"ds":"2026-03-22","cust":44,"usd":0.8,"tx":87}
+];
+const LN_DAILY_ZBD_App = [
+  {"ds":"2026-01-07","cust":228,"usd":370.08,"tx":245},
+  {"ds":"2026-01-08","cust":1172,"usd":2021.99,"tx":1391},
+  {"ds":"2026-01-09","cust":1221,"usd":1820.82,"tx":1449},
+  {"ds":"2026-01-10","cust":1198,"usd":1620.19,"tx":1352},
+  {"ds":"2026-01-11","cust":1163,"usd":1739.15,"tx":1366},
+  {"ds":"2026-01-12","cust":1207,"usd":1662.86,"tx":1423},
+  {"ds":"2026-01-13","cust":1090,"usd":1920.6,"tx":1312},
+  {"ds":"2026-01-14","cust":1438,"usd":3363.79,"tx":1813},
+  {"ds":"2026-01-15","cust":1392,"usd":2599.61,"tx":1656},
+  {"ds":"2026-01-16","cust":1336,"usd":2539.81,"tx":1595},
+  {"ds":"2026-01-17","cust":1266,"usd":2653.85,"tx":1531},
+  {"ds":"2026-01-18","cust":1283,"usd":2026.3,"tx":1569},
+  {"ds":"2026-01-19","cust":1450,"usd":2570.12,"tx":1710},
+  {"ds":"2026-01-20","cust":1288,"usd":1869.84,"tx":1546},
+  {"ds":"2026-01-21","cust":1227,"usd":2138.96,"tx":1406},
+  {"ds":"2026-01-22","cust":1403,"usd":2286.58,"tx":1624},
+  {"ds":"2026-01-23","cust":1340,"usd":2219.94,"tx":1579},
+  {"ds":"2026-01-24","cust":1234,"usd":2216.19,"tx":1450},
+  {"ds":"2026-01-25","cust":1292,"usd":1787.09,"tx":1512},
+  {"ds":"2026-01-26","cust":1347,"usd":1920.48,"tx":1603},
+  {"ds":"2026-01-27","cust":1349,"usd":1836.09,"tx":1591},
+  {"ds":"2026-01-28","cust":1292,"usd":2155.65,"tx":1569},
+  {"ds":"2026-01-29","cust":1396,"usd":2413.94,"tx":1679},
+  {"ds":"2026-01-30","cust":1296,"usd":1972.81,"tx":1518},
+  {"ds":"2026-01-31","cust":1207,"usd":1823.66,"tx":1441},
+  {"ds":"2026-02-01","cust":1248,"usd":2011.78,"tx":1467},
+  {"ds":"2026-02-02","cust":1372,"usd":1750.62,"tx":1635},
+  {"ds":"2026-02-03","cust":1254,"usd":1604.51,"tx":1495},
+  {"ds":"2026-02-04","cust":1206,"usd":1869.23,"tx":1399},
+  {"ds":"2026-02-05","cust":1112,"usd":1543.18,"tx":1322},
+  {"ds":"2026-02-06","cust":1268,"usd":1931.84,"tx":1496},
+  {"ds":"2026-02-07","cust":1128,"usd":1187.96,"tx":1336},
+  {"ds":"2026-02-08","cust":1133,"usd":1387.7,"tx":1363},
+  {"ds":"2026-02-09","cust":1125,"usd":2094.52,"tx":1319},
+  {"ds":"2026-02-10","cust":1083,"usd":1351.2,"tx":1274},
+  {"ds":"2026-02-11","cust":1137,"usd":1593.78,"tx":1354},
+  {"ds":"2026-02-12","cust":1110,"usd":1525.49,"tx":1288},
+  {"ds":"2026-02-13","cust":1126,"usd":1897.0,"tx":1321},
+  {"ds":"2026-02-14","cust":1125,"usd":1557.27,"tx":1295},
+  {"ds":"2026-02-15","cust":1181,"usd":1774.16,"tx":1394},
+  {"ds":"2026-02-16","cust":1158,"usd":1281.24,"tx":1343},
+  {"ds":"2026-02-17","cust":1168,"usd":1853.74,"tx":1363},
+  {"ds":"2026-02-18","cust":1158,"usd":1814.91,"tx":1342},
+  {"ds":"2026-02-19","cust":985,"usd":1640.97,"tx":1117},
+  {"ds":"2026-02-20","cust":909,"usd":1438.16,"tx":1030},
+  {"ds":"2026-02-21","cust":1028,"usd":1378.59,"tx":1217},
+  {"ds":"2026-02-22","cust":1066,"usd":1549.48,"tx":1274},
+  {"ds":"2026-02-23","cust":1183,"usd":1766.21,"tx":1392},
+  {"ds":"2026-02-24","cust":868,"usd":1108.66,"tx":999},
+  {"ds":"2026-02-25","cust":590,"usd":892.51,"tx":652},
+  {"ds":"2026-02-26","cust":304,"usd":473.07,"tx":334},
+  {"ds":"2026-02-27","cust":168,"usd":210.83,"tx":191},
+  {"ds":"2026-02-28","cust":115,"usd":137.52,"tx":127},
+  {"ds":"2026-03-01","cust":90,"usd":181.76,"tx":101},
+  {"ds":"2026-03-02","cust":103,"usd":98.51,"tx":119},
+  {"ds":"2026-03-03","cust":80,"usd":80.48,"tx":93},
+  {"ds":"2026-03-04","cust":76,"usd":148.87,"tx":88},
+  {"ds":"2026-03-05","cust":68,"usd":51.74,"tx":74},
+  {"ds":"2026-03-06","cust":45,"usd":29.88,"tx":49},
+  {"ds":"2026-03-07","cust":39,"usd":44.48,"tx":48},
+  {"ds":"2026-03-08","cust":50,"usd":116.61,"tx":56},
+  {"ds":"2026-03-09","cust":51,"usd":86.75,"tx":56},
+  {"ds":"2026-03-10","cust":44,"usd":88.74,"tx":47},
+  {"ds":"2026-03-11","cust":39,"usd":28.58,"tx":44},
+  {"ds":"2026-03-12","cust":32,"usd":16.24,"tx":37},
+  {"ds":"2026-03-13","cust":35,"usd":62.75,"tx":35},
+  {"ds":"2026-03-14","cust":31,"usd":22.29,"tx":32},
+  {"ds":"2026-03-15","cust":33,"usd":74.11,"tx":38},
+  {"ds":"2026-03-16","cust":45,"usd":27.89,"tx":51},
+  {"ds":"2026-03-17","cust":26,"usd":92.63,"tx":28},
+  {"ds":"2026-03-18","cust":28,"usd":57.58,"tx":29},
+  {"ds":"2026-03-19","cust":24,"usd":44.01,"tx":29},
+  {"ds":"2026-03-20","cust":26,"usd":22.13,"tx":28},
+  {"ds":"2026-03-21","cust":23,"usd":31.95,"tx":27},
+  {"ds":"2026-03-22","cust":30,"usd":18.5,"tx":34}
+];
+const LN_DAILY_ZBD_SDK = [
+  {"ds":"2026-01-28","cust":1,"usd":0.01,"tx":1},
+  {"ds":"2026-02-12","cust":3,"usd":0.53,"tx":9},
+  {"ds":"2026-02-13","cust":4,"usd":0.7,"tx":19},
+  {"ds":"2026-02-14","cust":3,"usd":0.28,"tx":10},
+  {"ds":"2026-02-15","cust":3,"usd":0.43,"tx":11},
+  {"ds":"2026-02-16","cust":6,"usd":0.85,"tx":30},
+  {"ds":"2026-02-17","cust":7,"usd":0.69,"tx":23},
+  {"ds":"2026-02-18","cust":6,"usd":0.54,"tx":18},
+  {"ds":"2026-02-19","cust":5,"usd":0.65,"tx":20},
+  {"ds":"2026-02-20","cust":6,"usd":0.44,"tx":20},
+  {"ds":"2026-02-21","cust":7,"usd":0.28,"tx":17},
+  {"ds":"2026-02-22","cust":6,"usd":0.23,"tx":16},
+  {"ds":"2026-02-23","cust":7,"usd":0.46,"tx":12},
+  {"ds":"2026-02-24","cust":5,"usd":0.71,"tx":17},
+  {"ds":"2026-02-25","cust":4,"usd":0.21,"tx":12},
+  {"ds":"2026-02-26","cust":7,"usd":0.48,"tx":16},
+  {"ds":"2026-02-27","cust":7,"usd":0.79,"tx":12},
+  {"ds":"2026-02-28","cust":5,"usd":0.57,"tx":19},
+  {"ds":"2026-03-01","cust":6,"usd":0.61,"tx":13},
+  {"ds":"2026-03-02","cust":6,"usd":1.24,"tx":20},
+  {"ds":"2026-03-03","cust":5,"usd":0.83,"tx":10},
+  {"ds":"2026-03-04","cust":4,"usd":0.98,"tx":12},
+  {"ds":"2026-03-05","cust":4,"usd":1.84,"tx":23},
+  {"ds":"2026-03-06","cust":6,"usd":1.79,"tx":14},
+  {"ds":"2026-03-07","cust":4,"usd":1.25,"tx":9},
+  {"ds":"2026-03-08","cust":11,"usd":2.59,"tx":42},
+  {"ds":"2026-03-09","cust":7,"usd":2.47,"tx":20},
+  {"ds":"2026-03-10","cust":6,"usd":1.79,"tx":13},
+  {"ds":"2026-03-11","cust":7,"usd":1.51,"tx":15},
+  {"ds":"2026-03-12","cust":7,"usd":0.92,"tx":16},
+  {"ds":"2026-03-13","cust":9,"usd":1.81,"tx":23},
+  {"ds":"2026-03-14","cust":7,"usd":1.31,"tx":16},
+  {"ds":"2026-03-15","cust":6,"usd":1.77,"tx":15},
+  {"ds":"2026-03-16","cust":7,"usd":1.31,"tx":13},
+  {"ds":"2026-03-17","cust":9,"usd":1.78,"tx":16},
+  {"ds":"2026-03-18","cust":6,"usd":1.3,"tx":18},
+  {"ds":"2026-03-19","cust":8,"usd":0.77,"tx":10},
+  {"ds":"2026-03-20","cust":3,"usd":0.55,"tx":5},
+  {"ds":"2026-03-21","cust":9,"usd":1.66,"tx":14},
+  {"ds":"2026-03-22","cust":8,"usd":0.86,"tx":14}
 ];
 
-const WEEKLY_DATA = [
+const LN_WEEKLY_FUMB = [
   {"ds":"2025-10-27","cust":2305,"usd":511.39,"tx":3586},
   {"ds":"2025-11-03","cust":4570,"usd":1804.56,"tx":13478},
   {"ds":"2025-11-10","cust":4628,"usd":1737.11,"tx":13285},
   {"ds":"2025-11-17","cust":4853,"usd":1548.23,"tx":13582},
-  {"ds":"2025-11-24","cust":4761,"usd":1538.40,"tx":13680},
+  {"ds":"2025-11-24","cust":4761,"usd":1538.4,"tx":13680},
   {"ds":"2025-12-01","cust":5013,"usd":1624.27,"tx":14509},
-  {"ds":"2025-12-08","cust":4994,"usd":1602.30,"tx":14004},
+  {"ds":"2025-12-08","cust":4994,"usd":1602.3,"tx":14004},
   {"ds":"2025-12-15","cust":4978,"usd":1579.94,"tx":14391},
   {"ds":"2025-12-22","cust":4740,"usd":1535.25,"tx":13495},
   {"ds":"2025-12-29","cust":4910,"usd":1586.91,"tx":13694},
@@ -355,231 +721,783 @@ const WEEKLY_DATA = [
   {"ds":"2026-02-16","cust":4139,"usd":980.48,"tx":10962},
   {"ds":"2026-02-23","cust":3759,"usd":866.62,"tx":9466},
   {"ds":"2026-03-02","cust":3434,"usd":883.75,"tx":8210},
-  {"ds":"2026-03-09","cust":3500,"usd":902.40,"tx":8689},
-  {"ds":"2026-03-16","cust":1545,"usd":226.97,"tx":2266}
+  {"ds":"2026-03-09","cust":3500,"usd":902.4,"tx":8689},
+  {"ds":"2026-03-16","cust":3280,"usd":860.17,"tx":8375}
+];
+const LN_WEEKLY_THNDR = [
+  {"ds":"2025-10-27","cust":126,"usd":3.43,"tx":319},
+  {"ds":"2025-11-03","cust":230,"usd":15.8,"tx":997},
+  {"ds":"2025-11-10","cust":217,"usd":13.29,"tx":920},
+  {"ds":"2025-11-17","cust":227,"usd":10.95,"tx":864},
+  {"ds":"2025-11-24","cust":218,"usd":9.21,"tx":841},
+  {"ds":"2025-12-01","cust":199,"usd":10.14,"tx":783},
+  {"ds":"2025-12-08","cust":193,"usd":8.83,"tx":707},
+  {"ds":"2025-12-15","cust":186,"usd":9.37,"tx":758},
+  {"ds":"2025-12-22","cust":189,"usd":11.45,"tx":691},
+  {"ds":"2025-12-29","cust":198,"usd":10.88,"tx":795},
+  {"ds":"2026-01-05","cust":201,"usd":9.85,"tx":793},
+  {"ds":"2026-01-12","cust":193,"usd":12.5,"tx":757},
+  {"ds":"2026-01-19","cust":191,"usd":10.58,"tx":777},
+  {"ds":"2026-01-26","cust":185,"usd":12.09,"tx":934},
+  {"ds":"2026-02-02","cust":183,"usd":8.18,"tx":825},
+  {"ds":"2026-02-09","cust":179,"usd":6.36,"tx":768},
+  {"ds":"2026-02-16","cust":173,"usd":8.07,"tx":770},
+  {"ds":"2026-02-23","cust":185,"usd":6.68,"tx":726},
+  {"ds":"2026-03-02","cust":169,"usd":6.02,"tx":750},
+  {"ds":"2026-03-09","cust":154,"usd":7.07,"tx":803},
+  {"ds":"2026-03-16","cust":151,"usd":5.94,"tx":625}
+];
+const LN_WEEKLY_ZBD_App = [
+  {"ds":"2026-01-05","cust":3730,"usd":7572.23,"tx":5803},
+  {"ds":"2026-01-12","cust":5728,"usd":16766.82,"tx":10899},
+  {"ds":"2026-01-19","cust":5881,"usd":15088.72,"tx":10827},
+  {"ds":"2026-01-26","cust":5839,"usd":14134.41,"tx":10868},
+  {"ds":"2026-02-02","cust":5437,"usd":11275.04,"tx":10046},
+  {"ds":"2026-02-09","cust":5000,"usd":11793.42,"tx":9245},
+  {"ds":"2026-02-16","cust":4931,"usd":10957.09,"tx":8686},
+  {"ds":"2026-02-23","cust":2650,"usd":4770.56,"tx":3796},
+  {"ds":"2026-03-02","cust":364,"usd":570.57,"tx":527},
+  {"ds":"2026-03-09","cust":202,"usd":379.46,"tx":289},
+  {"ds":"2026-03-16","cust":154,"usd":294.69,"tx":226}
+];
+const LN_WEEKLY_ZBD_SDK = [
+  {"ds":"2026-01-26","cust":1,"usd":0.01,"tx":1},
+  {"ds":"2026-02-09","cust":6,"usd":1.94,"tx":49},
+  {"ds":"2026-02-16","cust":14,"usd":3.68,"tx":144},
+  {"ds":"2026-02-23","cust":17,"usd":3.83,"tx":101},
+  {"ds":"2026-03-02","cust":18,"usd":10.52,"tx":130},
+  {"ds":"2026-03-09","cust":17,"usd":11.58,"tx":118},
+  {"ds":"2026-03-16","cust":15,"usd":8.23,"tx":90}
 ];
 
-const MONTHLY_DATA = [
+const LN_MONTHLY_FUMB = [
   {"ds":"2025-11-01","cust":9293,"usd":7139.69,"tx":57611},
   {"ds":"2025-12-01","cust":10066,"usd":7015.04,"tx":62306},
   {"ds":"2026-01-01","cust":10162,"usd":7165.54,"tx":60313},
   {"ds":"2026-02-01","cust":8229,"usd":4063.72,"tx":44307},
-  {"ds":"2026-03-01","cust":5351,"usd":2139.29,"tx":20525}
+  {"ds":"2026-03-01","cust":5991,"usd":2772.49,"tx":26634}
+];
+const LN_MONTHLY_THNDR = [
+  {"ds":"2025-11-01","cust":431,"usd":52.68,"tx":3941},
+  {"ds":"2025-12-01","cust":359,"usd":44.04,"tx":3266},
+  {"ds":"2026-01-01","cust":361,"usd":50.17,"tx":3584},
+  {"ds":"2026-02-01","cust":308,"usd":29.53,"tx":3138},
+  {"ds":"2026-03-01","cust":247,"usd":20.27,"tx":2274}
+];
+const LN_MONTHLY_ZBD_App = [
+  {"ds":"2026-01-01","cust":12819,"usd":51550.4,"tx":36930},
+  {"ds":"2026-02-01","cust":11721,"usd":40626.13,"tx":33139},
+  {"ds":"2026-03-01","cust":646,"usd":1426.48,"tx":1143}
+];
+const LN_MONTHLY_ZBD_SDK = [
+  {"ds":"2026-01-01","cust":1,"usd":0.01,"tx":1},
+  {"ds":"2026-02-01","cust":24,"usd":8.84,"tx":281},
+  {"ds":"2026-03-01","cust":28,"usd":30.94,"tx":351}
 ];
 
-const BUY_DAILY_DATA = [
-  {"ds":"2025-11-01","cust":395,"usd":30024.22,"tx":764},
-  {"ds":"2025-11-02","cust":372,"usd":25476.80,"tx":647},
-  {"ds":"2025-11-03","cust":371,"usd":32120.59,"tx":639},
-  {"ds":"2025-11-04","cust":468,"usd":38458.87,"tx":807},
-  {"ds":"2025-11-05","cust":433,"usd":39934.24,"tx":772},
-  {"ds":"2025-11-06","cust":448,"usd":45566.16,"tx":839},
-  {"ds":"2025-11-07","cust":438,"usd":37148.61,"tx":793},
-  {"ds":"2025-11-08","cust":396,"usd":36377.58,"tx":694},
-  {"ds":"2025-11-09","cust":336,"usd":24286.57,"tx":586},
-  {"ds":"2025-11-10","cust":347,"usd":36074.61,"tx":558},
-  {"ds":"2025-11-11","cust":357,"usd":27929.48,"tx":615},
-  {"ds":"2025-11-12","cust":415,"usd":34170.88,"tx":701},
-  {"ds":"2025-11-13","cust":493,"usd":78256.58,"tx":929},
-  {"ds":"2025-11-14","cust":497,"usd":47627.21,"tx":864},
-  {"ds":"2025-11-15","cust":403,"usd":30424.50,"tx":752},
-  {"ds":"2025-11-16","cust":367,"usd":28624.23,"tx":699},
-  {"ds":"2025-11-17","cust":377,"usd":36425.55,"tx":721},
-  {"ds":"2025-11-18","cust":456,"usd":34090.68,"tx":769},
-  {"ds":"2025-11-19","cust":450,"usd":39394.45,"tx":744},
-  {"ds":"2025-11-20","cust":487,"usd":53211.95,"tx":913},
-  {"ds":"2025-11-21","cust":479,"usd":49225.55,"tx":844},
-  {"ds":"2025-11-22","cust":395,"usd":46587.74,"tx":720},
-  {"ds":"2025-11-23","cust":404,"usd":35368.21,"tx":664},
-  {"ds":"2025-11-24","cust":392,"usd":36528.16,"tx":677},
-  {"ds":"2025-11-25","cust":421,"usd":41833.95,"tx":773},
-  {"ds":"2025-11-26","cust":455,"usd":47691.36,"tx":877},
-  {"ds":"2025-11-27","cust":433,"usd":40730.13,"tx":808},
-  {"ds":"2025-11-28","cust":383,"usd":36765.46,"tx":670},
-  {"ds":"2025-11-29","cust":369,"usd":34902.60,"tx":741},
-  {"ds":"2025-11-30","cust":334,"usd":27559.71,"tx":708},
-  {"ds":"2025-12-01","cust":451,"usd":36597.22,"tx":777},
-  {"ds":"2025-12-02","cust":404,"usd":37304.76,"tx":655},
-  {"ds":"2025-12-03","cust":446,"usd":53791.42,"tx":838},
-  {"ds":"2025-12-04","cust":460,"usd":47535.33,"tx":826},
-  {"ds":"2025-12-05","cust":489,"usd":51507.22,"tx":893},
-  {"ds":"2025-12-06","cust":392,"usd":39453.69,"tx":729},
-  {"ds":"2025-12-07","cust":370,"usd":28393.61,"tx":742},
-  {"ds":"2025-12-08","cust":389,"usd":31548.61,"tx":723},
-  {"ds":"2025-12-09","cust":380,"usd":31395.63,"tx":742},
-  {"ds":"2025-12-10","cust":419,"usd":32870.19,"tx":800},
-  {"ds":"2025-12-11","cust":445,"usd":47543.02,"tx":883},
-  {"ds":"2025-12-12","cust":442,"usd":50676.57,"tx":845},
-  {"ds":"2025-12-13","cust":392,"usd":28470.29,"tx":673},
-  {"ds":"2025-12-14","cust":336,"usd":21290.20,"tx":562},
-  {"ds":"2025-12-15","cust":443,"usd":20390.44,"tx":729},
-  {"ds":"2025-12-16","cust":674,"usd":33062.07,"tx":1074},
-  {"ds":"2025-12-17","cust":490,"usd":45195.80,"tx":812},
-  {"ds":"2025-12-18","cust":508,"usd":45732.47,"tx":935},
-  {"ds":"2025-12-19","cust":469,"usd":41304.77,"tx":874},
-  {"ds":"2025-12-20","cust":442,"usd":50964.84,"tx":833},
-  {"ds":"2025-12-21","cust":351,"usd":33227.45,"tx":599},
-  {"ds":"2025-12-22","cust":399,"usd":27479.24,"tx":672},
-  {"ds":"2025-12-23","cust":478,"usd":52161.51,"tx":840},
-  {"ds":"2025-12-24","cust":475,"usd":50244.03,"tx":901},
-  {"ds":"2025-12-25","cust":411,"usd":36189.93,"tx":757},
-  {"ds":"2025-12-26","cust":400,"usd":35301.12,"tx":709},
-  {"ds":"2025-12-27","cust":363,"usd":22219.85,"tx":617},
-  {"ds":"2025-12-28","cust":334,"usd":22229.07,"tx":519},
-  {"ds":"2025-12-29","cust":399,"usd":35759.12,"tx":644},
-  {"ds":"2025-12-30","cust":449,"usd":40025.70,"tx":712},
-  {"ds":"2025-12-31","cust":441,"usd":38511.95,"tx":720},
-  {"ds":"2026-01-01","cust":387,"usd":35412.71,"tx":740},
-  {"ds":"2026-01-02","cust":433,"usd":42750.86,"tx":742},
-  {"ds":"2026-01-03","cust":370,"usd":29665.29,"tx":648},
-  {"ds":"2026-01-04","cust":331,"usd":29521.61,"tx":597},
-  {"ds":"2026-01-05","cust":380,"usd":27134.16,"tx":661},
-  {"ds":"2026-01-06","cust":364,"usd":27366.35,"tx":622},
-  {"ds":"2026-01-07","cust":343,"usd":31346.89,"tx":574},
-  {"ds":"2026-01-08","cust":370,"usd":37800.42,"tx":648},
-  {"ds":"2026-01-09","cust":397,"usd":29073.56,"tx":730},
-  {"ds":"2026-01-10","cust":342,"usd":29975.10,"tx":566},
-  {"ds":"2026-01-11","cust":326,"usd":29820.98,"tx":536},
-  {"ds":"2026-01-12","cust":332,"usd":24976.00,"tx":552},
-  {"ds":"2026-01-13","cust":375,"usd":27783.52,"tx":590},
-  {"ds":"2026-01-14","cust":360,"usd":26789.02,"tx":596},
-  {"ds":"2026-01-15","cust":429,"usd":43333.45,"tx":724},
-  {"ds":"2026-01-16","cust":388,"usd":30891.13,"tx":648},
-  {"ds":"2026-01-17","cust":335,"usd":25994.29,"tx":611},
-  {"ds":"2026-01-18","cust":311,"usd":26378.44,"tx":553},
-  {"ds":"2026-01-19","cust":315,"usd":17418.73,"tx":522},
-  {"ds":"2026-01-20","cust":372,"usd":23896.03,"tx":574},
-  {"ds":"2026-01-21","cust":374,"usd":27476.69,"tx":648},
-  {"ds":"2026-01-22","cust":382,"usd":47130.55,"tx":699},
-  {"ds":"2026-01-23","cust":382,"usd":51369.88,"tx":672},
-  {"ds":"2026-01-24","cust":323,"usd":27056.19,"tx":532},
-  {"ds":"2026-01-25","cust":287,"usd":25510.91,"tx":505},
-  {"ds":"2026-01-26","cust":342,"usd":26130.39,"tx":596},
-  {"ds":"2026-01-27","cust":341,"usd":25294.84,"tx":538},
-  {"ds":"2026-01-28","cust":341,"usd":27918.18,"tx":611},
-  {"ds":"2026-01-29","cust":430,"usd":47365.49,"tx":761},
-  {"ds":"2026-01-30","cust":470,"usd":50361.08,"tx":830},
-  {"ds":"2026-01-31","cust":373,"usd":43802.64,"tx":631},
-  {"ds":"2026-02-01","cust":330,"usd":25422.08,"tx":536},
-  {"ds":"2026-02-02","cust":366,"usd":31288.23,"tx":622},
-  {"ds":"2026-02-03","cust":415,"usd":45654.30,"tx":693},
-  {"ds":"2026-02-04","cust":407,"usd":40417.13,"tx":669},
-  {"ds":"2026-02-05","cust":481,"usd":45764.72,"tx":827},
-  {"ds":"2026-02-06","cust":499,"usd":45875.31,"tx":832},
-  {"ds":"2026-02-07","cust":377,"usd":36316.22,"tx":628},
-  {"ds":"2026-02-08","cust":330,"usd":26176.32,"tx":543},
-  {"ds":"2026-02-09","cust":329,"usd":31534.16,"tx":551},
-  {"ds":"2026-02-10","cust":332,"usd":23762.30,"tx":534},
-  {"ds":"2026-02-11","cust":359,"usd":29478.62,"tx":558},
-  {"ds":"2026-02-12","cust":396,"usd":31202.54,"tx":653},
-  {"ds":"2026-02-13","cust":424,"usd":35831.43,"tx":710},
-  {"ds":"2026-02-14","cust":358,"usd":31053.32,"tx":651},
-  {"ds":"2026-02-15","cust":312,"usd":23990.02,"tx":531},
-  {"ds":"2026-02-16","cust":300,"usd":17654.85,"tx":482},
-  {"ds":"2026-02-17","cust":306,"usd":21806.05,"tx":491},
-  {"ds":"2026-02-18","cust":364,"usd":31850.96,"tx":566},
-  {"ds":"2026-02-19","cust":401,"usd":39724.17,"tx":689},
-  {"ds":"2026-02-20","cust":382,"usd":40771.53,"tx":669},
-  {"ds":"2026-02-21","cust":364,"usd":42883.59,"tx":726},
-  {"ds":"2026-02-22","cust":289,"usd":18765.04,"tx":457},
-  {"ds":"2026-02-23","cust":384,"usd":35881.25,"tx":595},
-  {"ds":"2026-02-24","cust":402,"usd":31769.45,"tx":635},
-  {"ds":"2026-02-25","cust":469,"usd":42980.24,"tx":816},
-  {"ds":"2026-02-26","cust":426,"usd":42542.53,"tx":732},
-  {"ds":"2026-02-27","cust":421,"usd":52713.18,"tx":749},
-  {"ds":"2026-02-28","cust":370,"usd":35762.02,"tx":678},
-  {"ds":"2026-03-01","cust":370,"usd":35274.15,"tx":647},
-  {"ds":"2026-03-02","cust":389,"usd":40239.05,"tx":666},
-  {"ds":"2026-03-03","cust":378,"usd":43397.32,"tx":676},
-  {"ds":"2026-03-04","cust":428,"usd":51713.93,"tx":738},
-  {"ds":"2026-03-05","cust":384,"usd":47104.78,"tx":733},
-  {"ds":"2026-03-06","cust":382,"usd":39379.95,"tx":661},
-  {"ds":"2026-03-07","cust":350,"usd":29835.24,"tx":664},
-  {"ds":"2026-03-08","cust":324,"usd":32131.24,"tx":586},
-  {"ds":"2026-03-09","cust":360,"usd":29426.30,"tx":615},
-  {"ds":"2026-03-10","cust":355,"usd":26271.51,"tx":579},
-  {"ds":"2026-03-11","cust":374,"usd":40476.65,"tx":604},
-  {"ds":"2026-03-12","cust":382,"usd":34774.17,"tx":658},
-  {"ds":"2026-03-13","cust":400,"usd":42927.22,"tx":661},
-  {"ds":"2026-03-14","cust":321,"usd":28152.71,"tx":566},
-  {"ds":"2026-03-15","cust":322,"usd":22208.74,"tx":501},
-  {"ds":"2026-03-16","cust":336,"usd":24638.13,"tx":507},
-  {"ds":"2026-03-17","cust":344,"usd":20542.53,"tx":544}
+const BUY_DAILY_FUMB = [
+  {"ds":"2025-11-01","cust":398,"usd":29365.34,"tx":771},
+  {"ds":"2025-11-02","cust":377,"usd":25889.18,"tx":663},
+  {"ds":"2025-11-03","cust":374,"usd":31898.86,"tx":644},
+  {"ds":"2025-11-04","cust":473,"usd":37750.09,"tx":817},
+  {"ds":"2025-11-05","cust":438,"usd":39374.96,"tx":779},
+  {"ds":"2025-11-06","cust":451,"usd":44428.34,"tx":845},
+  {"ds":"2025-11-07","cust":447,"usd":37935.82,"tx":806},
+  {"ds":"2025-11-08","cust":400,"usd":35324.11,"tx":698},
+  {"ds":"2025-11-09","cust":343,"usd":23786.31,"tx":598},
+  {"ds":"2025-11-10","cust":355,"usd":35625.14,"tx":568},
+  {"ds":"2025-11-11","cust":361,"usd":27085.06,"tx":619},
+  {"ds":"2025-11-12","cust":420,"usd":33806.13,"tx":712},
+  {"ds":"2025-11-13","cust":501,"usd":76721.56,"tx":941},
+  {"ds":"2025-11-14","cust":505,"usd":46908.75,"tx":879},
+  {"ds":"2025-11-15","cust":410,"usd":29749.5,"tx":775},
+  {"ds":"2025-11-16","cust":371,"usd":28069.11,"tx":707},
+  {"ds":"2025-11-17","cust":386,"usd":36022.25,"tx":738},
+  {"ds":"2025-11-18","cust":457,"usd":33012.28,"tx":773},
+  {"ds":"2025-11-19","cust":453,"usd":38345.45,"tx":750},
+  {"ds":"2025-11-20","cust":497,"usd":52743.75,"tx":932},
+  {"ds":"2025-11-21","cust":483,"usd":48011.12,"tx":859},
+  {"ds":"2025-11-22","cust":399,"usd":45696.46,"tx":727},
+  {"ds":"2025-11-23","cust":407,"usd":34253.89,"tx":671},
+  {"ds":"2025-11-24","cust":398,"usd":35768.76,"tx":684},
+  {"ds":"2025-11-25","cust":424,"usd":40757.29,"tx":781},
+  {"ds":"2025-11-26","cust":459,"usd":46559.7,"tx":884},
+  {"ds":"2025-11-27","cust":438,"usd":39762.68,"tx":818},
+  {"ds":"2025-11-28","cust":385,"usd":35627.5,"tx":672},
+  {"ds":"2025-11-29","cust":374,"usd":33948.23,"tx":748},
+  {"ds":"2025-11-30","cust":338,"usd":26819.25,"tx":717},
+  {"ds":"2025-12-01","cust":456,"usd":35872.76,"tx":785},
+  {"ds":"2025-12-02","cust":415,"usd":37058.95,"tx":669},
+  {"ds":"2025-12-03","cust":453,"usd":52761.58,"tx":849},
+  {"ds":"2025-12-04","cust":464,"usd":46318.39,"tx":831},
+  {"ds":"2025-12-05","cust":496,"usd":50265.79,"tx":903},
+  {"ds":"2025-12-06","cust":396,"usd":38233.99,"tx":734},
+  {"ds":"2025-12-07","cust":372,"usd":27515.73,"tx":747},
+  {"ds":"2025-12-08","cust":391,"usd":30564.15,"tx":727},
+  {"ds":"2025-12-09","cust":384,"usd":30590.2,"tx":752},
+  {"ds":"2025-12-10","cust":421,"usd":32050.49,"tx":808},
+  {"ds":"2025-12-11","cust":450,"usd":46491.23,"tx":895},
+  {"ds":"2025-12-12","cust":446,"usd":49369.97,"tx":853},
+  {"ds":"2025-12-13","cust":398,"usd":27595.15,"tx":682},
+  {"ds":"2025-12-14","cust":338,"usd":20542.47,"tx":564},
+  {"ds":"2025-12-15","cust":448,"usd":19730.95,"tx":738},
+  {"ds":"2025-12-16","cust":679,"usd":31998.23,"tx":1085},
+  {"ds":"2025-12-17","cust":496,"usd":44999.44,"tx":824},
+  {"ds":"2025-12-18","cust":516,"usd":44554.06,"tx":948},
+  {"ds":"2025-12-19","cust":474,"usd":40240.62,"tx":881},
+  {"ds":"2025-12-20","cust":453,"usd":49869.11,"tx":853},
+  {"ds":"2025-12-21","cust":357,"usd":32242.16,"tx":605},
+  {"ds":"2025-12-22","cust":404,"usd":26630.42,"tx":680},
+  {"ds":"2025-12-23","cust":483,"usd":50769.42,"tx":852},
+  {"ds":"2025-12-24","cust":483,"usd":51195.43,"tx":920},
+  {"ds":"2025-12-25","cust":419,"usd":35087.87,"tx":769},
+  {"ds":"2025-12-26","cust":402,"usd":34227.49,"tx":712},
+  {"ds":"2025-12-27","cust":365,"usd":21439.49,"tx":620},
+  {"ds":"2025-12-28","cust":336,"usd":21500.68,"tx":521},
+  {"ds":"2025-12-29","cust":407,"usd":35384.9,"tx":657},
+  {"ds":"2025-12-30","cust":456,"usd":39021.53,"tx":725},
+  {"ds":"2025-12-31","cust":446,"usd":39355.13,"tx":734},
+  {"ds":"2026-01-01","cust":395,"usd":34980.62,"tx":750},
+  {"ds":"2026-01-02","cust":437,"usd":41616.73,"tx":757},
+  {"ds":"2026-01-03","cust":377,"usd":28831.01,"tx":658},
+  {"ds":"2026-01-04","cust":337,"usd":28712.56,"tx":608},
+  {"ds":"2026-01-05","cust":387,"usd":26608.74,"tx":676},
+  {"ds":"2026-01-06","cust":368,"usd":26607.11,"tx":631},
+  {"ds":"2026-01-07","cust":347,"usd":30495.44,"tx":584},
+  {"ds":"2026-01-08","cust":378,"usd":36925.39,"tx":658},
+  {"ds":"2026-01-09","cust":401,"usd":29076.26,"tx":736},
+  {"ds":"2026-01-10","cust":352,"usd":29999.93,"tx":579},
+  {"ds":"2026-01-11","cust":330,"usd":28948.84,"tx":542},
+  {"ds":"2026-01-12","cust":337,"usd":24173.71,"tx":558},
+  {"ds":"2026-01-13","cust":377,"usd":27026.27,"tx":592},
+  {"ds":"2026-01-14","cust":364,"usd":25907.58,"tx":600},
+  {"ds":"2026-01-15","cust":437,"usd":42432.61,"tx":741},
+  {"ds":"2026-01-16","cust":395,"usd":32026.52,"tx":667},
+  {"ds":"2026-01-17","cust":338,"usd":25202.23,"tx":617},
+  {"ds":"2026-01-18","cust":315,"usd":25637.81,"tx":559},
+  {"ds":"2026-01-19","cust":320,"usd":17197.62,"tx":531},
+  {"ds":"2026-01-20","cust":374,"usd":23081.66,"tx":576},
+  {"ds":"2026-01-21","cust":382,"usd":27187.53,"tx":662},
+  {"ds":"2026-01-22","cust":389,"usd":45982.69,"tx":714},
+  {"ds":"2026-01-23","cust":386,"usd":50062.63,"tx":677},
+  {"ds":"2026-01-24","cust":328,"usd":26318.62,"tx":537},
+  {"ds":"2026-01-25","cust":287,"usd":24640.96,"tx":505},
+  {"ds":"2026-01-26","cust":346,"usd":27511.91,"tx":601},
+  {"ds":"2026-01-27","cust":347,"usd":24766.06,"tx":552},
+  {"ds":"2026-01-28","cust":342,"usd":26950.99,"tx":613},
+  {"ds":"2026-01-29","cust":434,"usd":46107.51,"tx":766},
+  {"ds":"2026-01-30","cust":474,"usd":49251.33,"tx":838},
+  {"ds":"2026-01-31","cust":380,"usd":42912.06,"tx":643},
+  {"ds":"2026-02-01","cust":334,"usd":24814.8,"tx":545},
+  {"ds":"2026-02-02","cust":371,"usd":31138.73,"tx":629},
+  {"ds":"2026-02-03","cust":421,"usd":48222.23,"tx":706},
+  {"ds":"2026-02-04","cust":412,"usd":39569.71,"tx":682},
+  {"ds":"2026-02-05","cust":484,"usd":44546.49,"tx":830},
+  {"ds":"2026-02-06","cust":503,"usd":45206.67,"tx":837},
+  {"ds":"2026-02-07","cust":384,"usd":36165.97,"tx":639},
+  {"ds":"2026-02-08","cust":333,"usd":25794.35,"tx":551},
+  {"ds":"2026-02-09","cust":333,"usd":30884.01,"tx":556},
+  {"ds":"2026-02-10","cust":336,"usd":23394.39,"tx":540},
+  {"ds":"2026-02-11","cust":362,"usd":28994.89,"tx":562},
+  {"ds":"2026-02-12","cust":401,"usd":31333.28,"tx":660},
+  {"ds":"2026-02-13","cust":431,"usd":35516.2,"tx":724},
+  {"ds":"2026-02-14","cust":361,"usd":30459.18,"tx":655},
+  {"ds":"2026-02-15","cust":314,"usd":23564.84,"tx":533},
+  {"ds":"2026-02-16","cust":305,"usd":17360.03,"tx":487},
+  {"ds":"2026-02-17","cust":311,"usd":21619.81,"tx":501},
+  {"ds":"2026-02-18","cust":369,"usd":31235.21,"tx":571},
+  {"ds":"2026-02-19","cust":412,"usd":40061.94,"tx":710},
+  {"ds":"2026-02-20","cust":388,"usd":41524.16,"tx":681},
+  {"ds":"2026-02-21","cust":371,"usd":42445.18,"tx":735},
+  {"ds":"2026-02-22","cust":293,"usd":18548.5,"tx":465},
+  {"ds":"2026-02-23","cust":391,"usd":37548.81,"tx":603},
+  {"ds":"2026-02-24","cust":407,"usd":31535.51,"tx":642},
+  {"ds":"2026-02-25","cust":479,"usd":43096.67,"tx":832},
+  {"ds":"2026-02-26","cust":438,"usd":43349.89,"tx":759},
+  {"ds":"2026-02-27","cust":433,"usd":55029.84,"tx":772},
+  {"ds":"2026-02-28","cust":377,"usd":35582.45,"tx":687},
+  {"ds":"2026-03-01","cust":378,"usd":35302.81,"tx":661},
+  {"ds":"2026-03-02","cust":403,"usd":40692.45,"tx":691},
+  {"ds":"2026-03-03","cust":385,"usd":42982.81,"tx":686},
+  {"ds":"2026-03-04","cust":437,"usd":51249.67,"tx":756},
+  {"ds":"2026-03-05","cust":394,"usd":47100.97,"tx":750},
+  {"ds":"2026-03-06","cust":388,"usd":39220.32,"tx":675},
+  {"ds":"2026-03-07","cust":360,"usd":29660.56,"tx":678},
+  {"ds":"2026-03-08","cust":330,"usd":31806.96,"tx":599},
+  {"ds":"2026-03-09","cust":366,"usd":31529.79,"tx":624},
+  {"ds":"2026-03-10","cust":362,"usd":26870.85,"tx":595},
+  {"ds":"2026-03-11","cust":380,"usd":40411.93,"tx":610},
+  {"ds":"2026-03-12","cust":391,"usd":34622.88,"tx":675},
+  {"ds":"2026-03-13","cust":409,"usd":43266.07,"tx":679},
+  {"ds":"2026-03-14","cust":329,"usd":28646.5,"tx":579},
+  {"ds":"2026-03-15","cust":328,"usd":22293.51,"tx":515},
+  {"ds":"2026-03-16","cust":340,"usd":24133.51,"tx":511},
+  {"ds":"2026-03-17","cust":346,"usd":20156.02,"tx":546},
+  {"ds":"2026-03-18","cust":328,"usd":29238.11,"tx":565},
+  {"ds":"2026-03-19","cust":435,"usd":34584.57,"tx":708},
+  {"ds":"2026-03-20","cust":348,"usd":33102.99,"tx":596},
+  {"ds":"2026-03-21","cust":316,"usd":33216.71,"tx":550},
+  {"ds":"2026-03-22","cust":290,"usd":34780.34,"tx":519}
+];
+const BUY_DAILY_THNDR = [
+  {"ds":"2025-11-01","cust":27,"usd":1649.16,"tx":49},
+  {"ds":"2025-11-02","cust":25,"usd":1989.4,"tx":39},
+  {"ds":"2025-11-03","cust":31,"usd":1602.03,"tx":49},
+  {"ds":"2025-11-04","cust":43,"usd":2992.71,"tx":76},
+  {"ds":"2025-11-05","cust":34,"usd":3514.49,"tx":69},
+  {"ds":"2025-11-06","cust":41,"usd":6418.32,"tx":68},
+  {"ds":"2025-11-07","cust":38,"usd":1786.88,"tx":57},
+  {"ds":"2025-11-08","cust":23,"usd":3653.29,"tx":45},
+  {"ds":"2025-11-09","cust":19,"usd":1502.5,"tx":37},
+  {"ds":"2025-11-10","cust":22,"usd":2739.32,"tx":33},
+  {"ds":"2025-11-11","cust":30,"usd":1955.33,"tx":54},
+  {"ds":"2025-11-12","cust":33,"usd":1472.25,"tx":54},
+  {"ds":"2025-11-13","cust":34,"usd":1766.0,"tx":52},
+  {"ds":"2025-11-14","cust":50,"usd":5485.25,"tx":69},
+  {"ds":"2025-11-15","cust":35,"usd":994.58,"tx":53},
+  {"ds":"2025-11-16","cust":24,"usd":566.57,"tx":36},
+  {"ds":"2025-11-17","cust":26,"usd":1579.61,"tx":39},
+  {"ds":"2025-11-18","cust":32,"usd":5116.65,"tx":48},
+  {"ds":"2025-11-19","cust":31,"usd":1126.51,"tx":47},
+  {"ds":"2025-11-20","cust":33,"usd":2881.02,"tx":62},
+  {"ds":"2025-11-21","cust":41,"usd":2685.21,"tx":75},
+  {"ds":"2025-11-22","cust":23,"usd":1435.86,"tx":47},
+  {"ds":"2025-11-23","cust":24,"usd":1126.37,"tx":43},
+  {"ds":"2025-11-24","cust":28,"usd":2554.87,"tx":69},
+  {"ds":"2025-11-25","cust":30,"usd":1958.87,"tx":58},
+  {"ds":"2025-11-26","cust":34,"usd":1383.88,"tx":58},
+  {"ds":"2025-11-27","cust":27,"usd":960.85,"tx":43},
+  {"ds":"2025-11-28","cust":34,"usd":1178.62,"tx":52},
+  {"ds":"2025-11-29","cust":30,"usd":2046.78,"tx":46},
+  {"ds":"2025-11-30","cust":24,"usd":752.44,"tx":34},
+  {"ds":"2025-12-01","cust":37,"usd":1667.41,"tx":61},
+  {"ds":"2025-12-02","cust":26,"usd":1982.13,"tx":53},
+  {"ds":"2025-12-03","cust":31,"usd":3113.59,"tx":54},
+  {"ds":"2025-12-04","cust":27,"usd":4998.26,"tx":80},
+  {"ds":"2025-12-05","cust":37,"usd":3823.66,"tx":85},
+  {"ds":"2025-12-06","cust":34,"usd":2020.87,"tx":71},
+  {"ds":"2025-12-07","cust":25,"usd":1336.29,"tx":57},
+  {"ds":"2025-12-08","cust":20,"usd":751.91,"tx":27},
+  {"ds":"2025-12-09","cust":21,"usd":691.89,"tx":35},
+  {"ds":"2025-12-10","cust":36,"usd":2250.55,"tx":65},
+  {"ds":"2025-12-11","cust":30,"usd":1665.65,"tx":47},
+  {"ds":"2025-12-12","cust":30,"usd":2393.22,"tx":71},
+  {"ds":"2025-12-13","cust":28,"usd":1386.9,"tx":53},
+  {"ds":"2025-12-14","cust":29,"usd":1234.24,"tx":43},
+  {"ds":"2025-12-15","cust":38,"usd":1324.98,"tx":61},
+  {"ds":"2025-12-16","cust":57,"usd":1402.17,"tx":83},
+  {"ds":"2025-12-17","cust":36,"usd":2269.22,"tx":63},
+  {"ds":"2025-12-18","cust":35,"usd":3675.37,"tx":55},
+  {"ds":"2025-12-19","cust":39,"usd":3933.01,"tx":76},
+  {"ds":"2025-12-20","cust":24,"usd":807.08,"tx":43},
+  {"ds":"2025-12-21","cust":35,"usd":1288.2,"tx":56},
+  {"ds":"2025-12-22","cust":39,"usd":1012.03,"tx":48},
+  {"ds":"2025-12-23","cust":46,"usd":3233.48,"tx":66},
+  {"ds":"2025-12-24","cust":37,"usd":2654.28,"tx":67},
+  {"ds":"2025-12-25","cust":25,"usd":976.47,"tx":42},
+  {"ds":"2025-12-26","cust":23,"usd":805.25,"tx":33},
+  {"ds":"2025-12-27","cust":25,"usd":2104.08,"tx":42},
+  {"ds":"2025-12-28","cust":25,"usd":1054.84,"tx":30},
+  {"ds":"2025-12-29","cust":29,"usd":1850.04,"tx":41},
+  {"ds":"2025-12-30","cust":42,"usd":1634.1,"tx":56},
+  {"ds":"2025-12-31","cust":27,"usd":2697.83,"tx":40},
+  {"ds":"2026-01-01","cust":33,"usd":1858.24,"tx":57},
+  {"ds":"2026-01-02","cust":26,"usd":1020.88,"tx":34},
+  {"ds":"2026-01-03","cust":19,"usd":757.89,"tx":41},
+  {"ds":"2026-01-04","cust":15,"usd":1329.54,"tx":35},
+  {"ds":"2026-01-05","cust":35,"usd":3564.16,"tx":53},
+  {"ds":"2026-01-06","cust":25,"usd":1956.52,"tx":49},
+  {"ds":"2026-01-07","cust":32,"usd":2330.7,"tx":53},
+  {"ds":"2026-01-08","cust":21,"usd":1169.7,"tx":34},
+  {"ds":"2026-01-09","cust":28,"usd":1871.19,"tx":52},
+  {"ds":"2026-01-10","cust":26,"usd":703.68,"tx":45},
+  {"ds":"2026-01-11","cust":22,"usd":736.67,"tx":39},
+  {"ds":"2026-01-12","cust":27,"usd":1309.84,"tx":51},
+  {"ds":"2026-01-13","cust":30,"usd":2104.85,"tx":47},
+  {"ds":"2026-01-14","cust":30,"usd":1475.66,"tx":49},
+  {"ds":"2026-01-15","cust":26,"usd":1647.94,"tx":44},
+  {"ds":"2026-01-16","cust":25,"usd":900.38,"tx":35},
+  {"ds":"2026-01-17","cust":22,"usd":1271.19,"tx":46},
+  {"ds":"2026-01-18","cust":19,"usd":852.36,"tx":33},
+  {"ds":"2026-01-19","cust":29,"usd":676.15,"tx":43},
+  {"ds":"2026-01-20","cust":27,"usd":1952.35,"tx":38},
+  {"ds":"2026-01-21","cust":35,"usd":1969.06,"tx":66},
+  {"ds":"2026-01-22","cust":26,"usd":1591.42,"tx":52},
+  {"ds":"2026-01-23","cust":35,"usd":1834.12,"tx":66},
+  {"ds":"2026-01-24","cust":33,"usd":1201.85,"tx":53},
+  {"ds":"2026-01-25","cust":29,"usd":969.81,"tx":45},
+  {"ds":"2026-01-26","cust":30,"usd":2618.12,"tx":39},
+  {"ds":"2026-01-27","cust":26,"usd":736.17,"tx":40},
+  {"ds":"2026-01-28","cust":24,"usd":867.55,"tx":33},
+  {"ds":"2026-01-29","cust":37,"usd":1823.71,"tx":58},
+  {"ds":"2026-01-30","cust":33,"usd":1510.77,"tx":48},
+  {"ds":"2026-01-31","cust":38,"usd":2701.93,"tx":62},
+  {"ds":"2026-02-01","cust":31,"usd":1358.41,"tx":44},
+  {"ds":"2026-02-02","cust":26,"usd":2311.31,"tx":42},
+  {"ds":"2026-02-03","cust":35,"usd":1951.74,"tx":50},
+  {"ds":"2026-02-04","cust":29,"usd":2230.95,"tx":48},
+  {"ds":"2026-02-05","cust":35,"usd":4205.07,"tx":53},
+  {"ds":"2026-02-06","cust":41,"usd":2634.35,"tx":60},
+  {"ds":"2026-02-07","cust":25,"usd":1460.03,"tx":46},
+  {"ds":"2026-02-08","cust":20,"usd":614.36,"tx":21},
+  {"ds":"2026-02-09","cust":16,"usd":558.8,"tx":25},
+  {"ds":"2026-02-10","cust":21,"usd":945.48,"tx":30},
+  {"ds":"2026-02-11","cust":27,"usd":3889.53,"tx":46},
+  {"ds":"2026-02-12","cust":25,"usd":1498.05,"tx":38},
+  {"ds":"2026-02-13","cust":32,"usd":3572.57,"tx":49},
+  {"ds":"2026-02-14","cust":18,"usd":2353.14,"tx":22},
+  {"ds":"2026-02-15","cust":22,"usd":2189.07,"tx":29},
+  {"ds":"2026-02-16","cust":22,"usd":617.55,"tx":27},
+  {"ds":"2026-02-17","cust":26,"usd":626.89,"tx":34},
+  {"ds":"2026-02-18","cust":31,"usd":1666.6,"tx":45},
+  {"ds":"2026-02-19","cust":26,"usd":2181.21,"tx":44},
+  {"ds":"2026-02-20","cust":28,"usd":1693.17,"tx":48},
+  {"ds":"2026-02-21","cust":23,"usd":1068.99,"tx":46},
+  {"ds":"2026-02-22","cust":20,"usd":914.42,"tx":35},
+  {"ds":"2026-02-23","cust":30,"usd":1065.6,"tx":42},
+  {"ds":"2026-02-24","cust":45,"usd":3772.87,"tx":83},
+  {"ds":"2026-02-25","cust":42,"usd":2341.54,"tx":83},
+  {"ds":"2026-02-26","cust":34,"usd":1886.6,"tx":64},
+  {"ds":"2026-02-27","cust":33,"usd":2543.59,"tx":68},
+  {"ds":"2026-02-28","cust":32,"usd":2482.37,"tx":46},
+  {"ds":"2026-03-01","cust":26,"usd":1544.82,"tx":35},
+  {"ds":"2026-03-02","cust":32,"usd":1558.79,"tx":57},
+  {"ds":"2026-03-03","cust":36,"usd":1624.55,"tx":64},
+  {"ds":"2026-03-04","cust":31,"usd":1849.23,"tx":54},
+  {"ds":"2026-03-05","cust":36,"usd":3772.75,"tx":68},
+  {"ds":"2026-03-06","cust":37,"usd":1586.92,"tx":62},
+  {"ds":"2026-03-07","cust":28,"usd":3031.42,"tx":44},
+  {"ds":"2026-03-08","cust":21,"usd":886.53,"tx":38},
+  {"ds":"2026-03-09","cust":35,"usd":3284.66,"tx":58},
+  {"ds":"2026-03-10","cust":28,"usd":1063.16,"tx":38},
+  {"ds":"2026-03-11","cust":22,"usd":1113.71,"tx":29},
+  {"ds":"2026-03-12","cust":23,"usd":1666.95,"tx":36},
+  {"ds":"2026-03-13","cust":31,"usd":2254.84,"tx":67},
+  {"ds":"2026-03-14","cust":22,"usd":541.81,"tx":33},
+  {"ds":"2026-03-15","cust":23,"usd":1067.03,"tx":47},
+  {"ds":"2026-03-16","cust":32,"usd":1655.01,"tx":44},
+  {"ds":"2026-03-17","cust":40,"usd":3618.06,"tx":51},
+  {"ds":"2026-03-18","cust":29,"usd":3879.12,"tx":41},
+  {"ds":"2026-03-19","cust":29,"usd":1622.66,"tx":37},
+  {"ds":"2026-03-20","cust":36,"usd":1992.15,"tx":78},
+  {"ds":"2026-03-21","cust":20,"usd":1320.48,"tx":31},
+  {"ds":"2026-03-22","cust":28,"usd":903.09,"tx":34}
+];
+const BUY_DAILY_ZBD_App = [
+  {"ds":"2025-11-01","cust":354,"usd":29647.25,"tx":596},
+  {"ds":"2025-11-02","cust":320,"usd":30364.01,"tx":525},
+  {"ds":"2025-11-03","cust":364,"usd":24483.63,"tx":623},
+  {"ds":"2025-11-04","cust":466,"usd":43266.19,"tx":759},
+  {"ds":"2025-11-05","cust":411,"usd":26845.92,"tx":648},
+  {"ds":"2025-11-06","cust":398,"usd":37608.04,"tx":679},
+  {"ds":"2025-11-07","cust":408,"usd":31634.43,"tx":672},
+  {"ds":"2025-11-08","cust":322,"usd":22383.58,"tx":584},
+  {"ds":"2025-11-09","cust":285,"usd":28318.8,"tx":534},
+  {"ds":"2025-11-10","cust":360,"usd":25382.52,"tx":541},
+  {"ds":"2025-11-11","cust":341,"usd":29762.96,"tx":582},
+  {"ds":"2025-11-12","cust":327,"usd":24993.6,"tx":538},
+  {"ds":"2025-11-13","cust":444,"usd":40822.54,"tx":741},
+  {"ds":"2025-11-14","cust":454,"usd":53059.4,"tx":785},
+  {"ds":"2025-11-15","cust":359,"usd":26681.49,"tx":659},
+  {"ds":"2025-11-16","cust":318,"usd":25849.3,"tx":523},
+  {"ds":"2025-11-17","cust":347,"usd":23885.61,"tx":576},
+  {"ds":"2025-11-18","cust":391,"usd":30737.14,"tx":655},
+  {"ds":"2025-11-19","cust":402,"usd":25810.35,"tx":621},
+  {"ds":"2025-11-20","cust":447,"usd":57084.07,"tx":789},
+  {"ds":"2025-11-21","cust":451,"usd":54591.12,"tx":763},
+  {"ds":"2025-11-22","cust":360,"usd":34671.35,"tx":649},
+  {"ds":"2025-11-23","cust":354,"usd":20920.74,"tx":597},
+  {"ds":"2025-11-24","cust":382,"usd":32363.72,"tx":656},
+  {"ds":"2025-11-25","cust":382,"usd":28492.5,"tx":666},
+  {"ds":"2025-11-26","cust":426,"usd":33998.5,"tx":762},
+  {"ds":"2025-11-27","cust":392,"usd":43252.32,"tx":745},
+  {"ds":"2025-11-28","cust":381,"usd":33361.17,"tx":652},
+  {"ds":"2025-11-29","cust":348,"usd":29319.83,"tx":645},
+  {"ds":"2025-11-30","cust":298,"usd":17908.95,"tx":535},
+  {"ds":"2025-12-01","cust":429,"usd":36934.33,"tx":732},
+  {"ds":"2025-12-02","cust":386,"usd":37239.44,"tx":661},
+  {"ds":"2025-12-03","cust":427,"usd":45686.94,"tx":710},
+  {"ds":"2025-12-04","cust":420,"usd":41960.3,"tx":692},
+  {"ds":"2025-12-05","cust":478,"usd":44415.7,"tx":787},
+  {"ds":"2025-12-06","cust":402,"usd":34263.4,"tx":688},
+  {"ds":"2025-12-07","cust":336,"usd":34132.48,"tx":608},
+  {"ds":"2025-12-08","cust":357,"usd":30298.09,"tx":605},
+  {"ds":"2025-12-09","cust":340,"usd":18624.46,"tx":570},
+  {"ds":"2025-12-10","cust":369,"usd":33560.38,"tx":620},
+  {"ds":"2025-12-11","cust":389,"usd":34281.75,"tx":658},
+  {"ds":"2025-12-12","cust":429,"usd":29948.96,"tx":752},
+  {"ds":"2025-12-13","cust":350,"usd":25158.55,"tx":588},
+  {"ds":"2025-12-14","cust":326,"usd":20846.56,"tx":516},
+  {"ds":"2025-12-15","cust":454,"usd":27180.83,"tx":693},
+  {"ds":"2025-12-16","cust":750,"usd":28911.44,"tx":1091},
+  {"ds":"2025-12-17","cust":460,"usd":27957.84,"tx":790},
+  {"ds":"2025-12-18","cust":498,"usd":39777.17,"tx":816},
+  {"ds":"2025-12-19","cust":477,"usd":48097.13,"tx":820},
+  {"ds":"2025-12-20","cust":411,"usd":35881.97,"tx":671},
+  {"ds":"2025-12-21","cust":319,"usd":35729.92,"tx":499},
+  {"ds":"2025-12-22","cust":437,"usd":29681.67,"tx":672},
+  {"ds":"2025-12-23","cust":474,"usd":39848.75,"tx":784},
+  {"ds":"2025-12-24","cust":452,"usd":35859.57,"tx":737},
+  {"ds":"2025-12-25","cust":395,"usd":24568.54,"tx":669},
+  {"ds":"2025-12-26","cust":396,"usd":30709.04,"tx":628},
+  {"ds":"2025-12-27","cust":363,"usd":22652.77,"tx":587},
+  {"ds":"2025-12-28","cust":298,"usd":16101.6,"tx":469},
+  {"ds":"2025-12-29","cust":406,"usd":35131.79,"tx":661},
+  {"ds":"2025-12-30","cust":432,"usd":38348.35,"tx":722},
+  {"ds":"2025-12-31","cust":476,"usd":42209.2,"tx":811},
+  {"ds":"2026-01-01","cust":428,"usd":34646.3,"tx":747},
+  {"ds":"2026-01-02","cust":469,"usd":35255.86,"tx":747},
+  {"ds":"2026-01-03","cust":407,"usd":30665.72,"tx":658},
+  {"ds":"2026-01-04","cust":354,"usd":28388.5,"tx":578},
+  {"ds":"2026-01-05","cust":389,"usd":26425.62,"tx":591},
+  {"ds":"2026-01-06","cust":390,"usd":25780.57,"tx":651},
+  {"ds":"2026-01-07","cust":382,"usd":29657.42,"tx":659},
+  {"ds":"2026-01-08","cust":438,"usd":32585.51,"tx":711},
+  {"ds":"2026-01-09","cust":445,"usd":55843.19,"tx":761},
+  {"ds":"2026-01-10","cust":378,"usd":24280.18,"tx":627},
+  {"ds":"2026-01-11","cust":349,"usd":24512.05,"tx":584},
+  {"ds":"2026-01-12","cust":342,"usd":20681.11,"tx":549},
+  {"ds":"2026-01-13","cust":410,"usd":28910.04,"tx":679},
+  {"ds":"2026-01-14","cust":456,"usd":30382.57,"tx":690},
+  {"ds":"2026-01-15","cust":447,"usd":47543.55,"tx":682},
+  {"ds":"2026-01-16","cust":446,"usd":45067.64,"tx":731},
+  {"ds":"2026-01-17","cust":372,"usd":24764.97,"tx":603},
+  {"ds":"2026-01-18","cust":322,"usd":14284.94,"tx":501},
+  {"ds":"2026-01-19","cust":351,"usd":22915.26,"tx":554},
+  {"ds":"2026-01-20","cust":383,"usd":26399.21,"tx":574},
+  {"ds":"2026-01-21","cust":435,"usd":32709.63,"tx":685},
+  {"ds":"2026-01-22","cust":434,"usd":34198.08,"tx":765},
+  {"ds":"2026-01-23","cust":471,"usd":48424.84,"tx":765},
+  {"ds":"2026-01-24","cust":401,"usd":34507.54,"tx":657},
+  {"ds":"2026-01-25","cust":346,"usd":18043.74,"tx":570},
+  {"ds":"2026-01-26","cust":368,"usd":24841.8,"tx":562},
+  {"ds":"2026-01-27","cust":427,"usd":27081.34,"tx":659},
+  {"ds":"2026-01-28","cust":415,"usd":30516.78,"tx":627},
+  {"ds":"2026-01-29","cust":535,"usd":40820.68,"tx":829},
+  {"ds":"2026-01-30","cust":551,"usd":60632.85,"tx":887},
+  {"ds":"2026-01-31","cust":540,"usd":41008.86,"tx":874},
+  {"ds":"2026-02-01","cust":421,"usd":28707.51,"tx":645},
+  {"ds":"2026-02-02","cust":416,"usd":31473.95,"tx":738},
+  {"ds":"2026-02-03","cust":471,"usd":36787.18,"tx":746},
+  {"ds":"2026-02-04","cust":474,"usd":38869.98,"tx":747},
+  {"ds":"2026-02-05","cust":565,"usd":81569.35,"tx":880},
+  {"ds":"2026-02-06","cust":623,"usd":56335.78,"tx":955},
+  {"ds":"2026-02-07","cust":407,"usd":24798.66,"tx":653},
+  {"ds":"2026-02-08","cust":386,"usd":26675.35,"tx":650},
+  {"ds":"2026-02-09","cust":368,"usd":18002.67,"tx":590},
+  {"ds":"2026-02-10","cust":417,"usd":26267.46,"tx":663},
+  {"ds":"2026-02-11","cust":415,"usd":43815.21,"tx":703},
+  {"ds":"2026-02-12","cust":466,"usd":51472.12,"tx":746},
+  {"ds":"2026-02-13","cust":505,"usd":59330.97,"tx":816},
+  {"ds":"2026-02-14","cust":434,"usd":25545.67,"tx":706},
+  {"ds":"2026-02-15","cust":371,"usd":24217.58,"tx":536},
+  {"ds":"2026-02-16","cust":308,"usd":18526.19,"tx":453},
+  {"ds":"2026-02-17","cust":345,"usd":18042.7,"tx":566},
+  {"ds":"2026-02-18","cust":411,"usd":28047.13,"tx":582},
+  {"ds":"2026-02-19","cust":442,"usd":39458.64,"tx":719},
+  {"ds":"2026-02-20","cust":474,"usd":54394.02,"tx":784},
+  {"ds":"2026-02-21","cust":434,"usd":43296.76,"tx":740},
+  {"ds":"2026-02-22","cust":348,"usd":29867.97,"tx":553},
+  {"ds":"2026-02-23","cust":428,"usd":36855.19,"tx":687},
+  {"ds":"2026-02-24","cust":453,"usd":37953.67,"tx":759},
+  {"ds":"2026-02-25","cust":524,"usd":56578.29,"tx":878},
+  {"ds":"2026-02-26","cust":521,"usd":52279.38,"tx":849},
+  {"ds":"2026-02-27","cust":499,"usd":55971.57,"tx":843},
+  {"ds":"2026-02-28","cust":468,"usd":40884.74,"tx":792},
+  {"ds":"2026-03-01","cust":372,"usd":38001.46,"tx":671},
+  {"ds":"2026-03-02","cust":431,"usd":35918.38,"tx":696},
+  {"ds":"2026-03-03","cust":406,"usd":49759.46,"tx":709},
+  {"ds":"2026-03-04","cust":485,"usd":38430.49,"tx":770},
+  {"ds":"2026-03-05","cust":454,"usd":46723.47,"tx":779},
+  {"ds":"2026-03-06","cust":431,"usd":43109.35,"tx":710},
+  {"ds":"2026-03-07","cust":352,"usd":21897.98,"tx":587},
+  {"ds":"2026-03-08","cust":330,"usd":23222.47,"tx":523},
+  {"ds":"2026-03-09","cust":396,"usd":24169.12,"tx":658},
+  {"ds":"2026-03-10","cust":384,"usd":26361.78,"tx":580},
+  {"ds":"2026-03-11","cust":376,"usd":35618.79,"tx":652},
+  {"ds":"2026-03-12","cust":400,"usd":36505.96,"tx":638},
+  {"ds":"2026-03-13","cust":459,"usd":51166.98,"tx":734},
+  {"ds":"2026-03-14","cust":347,"usd":22003.67,"tx":535},
+  {"ds":"2026-03-15","cust":323,"usd":24793.01,"tx":536},
+  {"ds":"2026-03-16","cust":383,"usd":22573.54,"tx":565},
+  {"ds":"2026-03-17","cust":378,"usd":25170.24,"tx":612},
+  {"ds":"2026-03-18","cust":372,"usd":26448.55,"tx":587},
+  {"ds":"2026-03-19","cust":450,"usd":33538.21,"tx":746},
+  {"ds":"2026-03-20","cust":377,"usd":30190.97,"tx":611},
+  {"ds":"2026-03-21","cust":331,"usd":20912.87,"tx":551},
+  {"ds":"2026-03-22","cust":322,"usd":17049.71,"tx":487}
+];
+const BUY_DAILY_ZBD_SDK = [
+  {"ds":"2025-11-01","cust":1,"usd":76.83,"tx":4},
+  {"ds":"2025-11-05","cust":3,"usd":97.59,"tx":3},
+  {"ds":"2025-11-06","cust":1,"usd":58.43,"tx":1},
+  {"ds":"2025-11-10","cust":1,"usd":97.04,"tx":1},
+  {"ds":"2025-11-11","cust":3,"usd":108.12,"tx":3},
+  {"ds":"2025-11-18","cust":1,"usd":23.77,"tx":1},
+  {"ds":"2025-11-19","cust":2,"usd":81.14,"tx":2},
+  {"ds":"2025-11-20","cust":1,"usd":26.25,"tx":1},
+  {"ds":"2025-11-23","cust":1,"usd":27.24,"tx":1},
+  {"ds":"2025-11-24","cust":2,"usd":57.45,"tx":2},
+  {"ds":"2025-11-25","cust":1,"usd":33.22,"tx":1},
+  {"ds":"2025-11-29","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2025-11-30","cust":1,"usd":16.86,"tx":2},
+  {"ds":"2025-12-03","cust":1,"usd":54.68,"tx":1},
+  {"ds":"2025-12-04","cust":1,"usd":82.19,"tx":1},
+  {"ds":"2025-12-05","cust":2,"usd":66.85,"tx":2},
+  {"ds":"2025-12-06","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2025-12-08","cust":1,"usd":97.04,"tx":1},
+  {"ds":"2025-12-10","cust":1,"usd":53.1,"tx":1},
+  {"ds":"2025-12-13","cust":2,"usd":4.14,"tx":4},
+  {"ds":"2025-12-14","cust":2,"usd":9.72,"tx":2},
+  {"ds":"2025-12-15","cust":1,"usd":10.0,"tx":1},
+  {"ds":"2025-12-16","cust":3,"usd":59.76,"tx":3},
+  {"ds":"2025-12-17","cust":2,"usd":64.65,"tx":3},
+  {"ds":"2025-12-18","cust":3,"usd":10.99,"tx":3},
+  {"ds":"2025-12-19","cust":2,"usd":27.5,"tx":2},
+  {"ds":"2025-12-20","cust":2,"usd":1.42,"tx":3},
+  {"ds":"2025-12-21","cust":1,"usd":0.19,"tx":1},
+  {"ds":"2025-12-23","cust":3,"usd":326.54,"tx":4},
+  {"ds":"2025-12-24","cust":1,"usd":10.0,"tx":1},
+  {"ds":"2025-12-26","cust":1,"usd":2.2,"tx":3},
+  {"ds":"2025-12-28","cust":2,"usd":19.12,"tx":2},
+  {"ds":"2025-12-30","cust":2,"usd":4.32,"tx":2},
+  {"ds":"2025-12-31","cust":3,"usd":64.27,"tx":4},
+  {"ds":"2026-01-01","cust":2,"usd":10.74,"tx":2},
+  {"ds":"2026-01-02","cust":1,"usd":1.35,"tx":2},
+  {"ds":"2026-01-04","cust":2,"usd":194.29,"tx":3},
+  {"ds":"2026-01-05","cust":1,"usd":0.55,"tx":2},
+  {"ds":"2026-01-06","cust":1,"usd":4.48,"tx":1},
+  {"ds":"2026-01-07","cust":2,"usd":10.25,"tx":2},
+  {"ds":"2026-01-08","cust":1,"usd":49.28,"tx":1},
+  {"ds":"2026-01-09","cust":1,"usd":1.64,"tx":2},
+  {"ds":"2026-01-12","cust":2,"usd":175.25,"tx":2},
+  {"ds":"2026-01-14","cust":2,"usd":10.74,"tx":2},
+  {"ds":"2026-01-15","cust":3,"usd":65.69,"tx":3},
+  {"ds":"2026-01-16","cust":1,"usd":1.59,"tx":1},
+  {"ds":"2026-01-19","cust":1,"usd":2.48,"tx":1},
+  {"ds":"2026-01-20","cust":2,"usd":19.56,"tx":2},
+  {"ds":"2026-01-21","cust":3,"usd":29.56,"tx":3},
+  {"ds":"2026-01-22","cust":3,"usd":106.75,"tx":3},
+  {"ds":"2026-01-25","cust":2,"usd":20.43,"tx":2},
+  {"ds":"2026-01-26","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2026-01-27","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2026-01-28","cust":1,"usd":10.0,"tx":1},
+  {"ds":"2026-01-29","cust":1,"usd":57.18,"tx":1},
+  {"ds":"2026-01-30","cust":1,"usd":2.9,"tx":2},
+  {"ds":"2026-01-31","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2026-02-01","cust":1,"usd":1.24,"tx":1},
+  {"ds":"2026-02-04","cust":2,"usd":301.1,"tx":3},
+  {"ds":"2026-02-05","cust":4,"usd":100.3,"tx":4},
+  {"ds":"2026-02-06","cust":1,"usd":9.42,"tx":1},
+  {"ds":"2026-02-08","cust":1,"usd":23.77,"tx":1},
+  {"ds":"2026-02-11","cust":2,"usd":19.73,"tx":2},
+  {"ds":"2026-02-12","cust":1,"usd":38.95,"tx":1},
+  {"ds":"2026-02-13","cust":1,"usd":243.78,"tx":1},
+  {"ds":"2026-02-14","cust":1,"usd":0.97,"tx":1},
+  {"ds":"2026-02-15","cust":2,"usd":107.24,"tx":2},
+  {"ds":"2026-02-16","cust":1,"usd":7.78,"tx":1},
+  {"ds":"2026-02-18","cust":2,"usd":19.73,"tx":2},
+  {"ds":"2026-02-19","cust":1,"usd":29.09,"tx":1},
+  {"ds":"2026-02-24","cust":2,"usd":121.87,"tx":2},
+  {"ds":"2026-02-25","cust":3,"usd":15.83,"tx":3},
+  {"ds":"2026-02-26","cust":2,"usd":230.26,"tx":2},
+  {"ds":"2026-02-27","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-02-28","cust":2,"usd":14.73,"tx":2},
+  {"ds":"2026-03-01","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-02","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-03","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-04","cust":3,"usd":112.51,"tx":3},
+  {"ds":"2026-03-05","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-06","cust":2,"usd":42.25,"tx":2},
+  {"ds":"2026-03-07","cust":2,"usd":6.0,"tx":2},
+  {"ds":"2026-03-08","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-09","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-10","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-11","cust":3,"usd":17.05,"tx":3},
+  {"ds":"2026-03-12","cust":2,"usd":102.28,"tx":3},
+  {"ds":"2026-03-13","cust":5,"usd":101.01,"tx":6},
+  {"ds":"2026-03-14","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-15","cust":2,"usd":6.32,"tx":2},
+  {"ds":"2026-03-16","cust":3,"usd":105.66,"tx":6},
+  {"ds":"2026-03-17","cust":2,"usd":46.82,"tx":3},
+  {"ds":"2026-03-18","cust":2,"usd":15.0,"tx":2},
+  {"ds":"2026-03-19","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-20","cust":2,"usd":46.74,"tx":2},
+  {"ds":"2026-03-21","cust":1,"usd":5.0,"tx":1},
+  {"ds":"2026-03-22","cust":1,"usd":5.0,"tx":1}
 ];
 
-const BUY_WEEKLY_DATA = [
-  {"ds":"2025-10-27","cust":623,"usd":55501.02,"tx":1411},
-  {"ds":"2025-11-03","cust":1545,"usd":253892.62,"tx":5130},
-  {"ds":"2025-11-10","cust":1526,"usd":283107.49,"tx":5118},
-  {"ds":"2025-11-17","cust":1640,"usd":294304.13,"tx":5375},
-  {"ds":"2025-11-24","cust":1508,"usd":266011.37,"tx":5254},
-  {"ds":"2025-12-01","cust":1653,"usd":294583.25,"tx":5460},
-  {"ds":"2025-12-08","cust":1490,"usd":243794.51,"tx":5228},
-  {"ds":"2025-12-15","cust":1985,"usd":269877.84,"tx":5856},
-  {"ds":"2025-12-22","cust":1587,"usd":245824.75,"tx":5015},
-  {"ds":"2025-12-29","cust":1599,"usd":251647.24,"tx":4803},
-  {"ds":"2026-01-05","cust":1442,"usd":212517.46,"tx":4337},
-  {"ds":"2026-01-12","cust":1501,"usd":206145.85,"tx":4274},
-  {"ds":"2026-01-19","cust":1363,"usd":219858.98,"tx":4152},
-  {"ds":"2026-01-26","cust":1492,"usd":246294.70,"tx":4503},
-  {"ds":"2026-02-02","cust":1574,"usd":271492.23,"tx":4814},
-  {"ds":"2026-02-09","cust":1366,"usd":206852.39,"tx":4188},
-  {"ds":"2026-02-16","cust":1295,"usd":213456.19,"tx":4080},
-  {"ds":"2026-02-23","cust":1517,"usd":276922.82,"tx":4852},
-  {"ds":"2026-03-02","cust":1333,"usd":283801.51,"tx":4724},
-  {"ds":"2026-03-09","cust":1275,"usd":224237.30,"tx":4184},
-  {"ds":"2026-03-16","cust":562,"usd":45181.66,"tx":1052}
+const BUY_WEEKLY_FUMB = [
+  {"ds":"2025-10-27","cust":629,"usd":55254.52,"tx":1434},
+  {"ds":"2025-11-03","cust":1564,"usd":250498.49,"tx":5187},
+  {"ds":"2025-11-10","cust":1547,"usd":277965.25,"tx":5201},
+  {"ds":"2025-11-17","cust":1658,"usd":288085.2,"tx":5450},
+  {"ds":"2025-11-24","cust":1525,"usd":259243.41,"tx":5304},
+  {"ds":"2025-12-01","cust":1674,"usd":288027.19,"tx":5518},
+  {"ds":"2025-12-08","cust":1506,"usd":237203.66,"tx":5281},
+  {"ds":"2025-12-15","cust":2017,"usd":263634.57,"tx":5934},
+  {"ds":"2025-12-22","cust":1608,"usd":240850.8,"tx":5074},
+  {"ds":"2025-12-29","cust":1626,"usd":247902.48,"tx":4889},
+  {"ds":"2026-01-05","cust":1465,"usd":208661.71,"tx":4406},
+  {"ds":"2026-01-12","cust":1521,"usd":202406.73,"tx":4334},
+  {"ds":"2026-01-19","cust":1385,"usd":214471.71,"tx":4202},
+  {"ds":"2026-01-26","cust":1511,"usd":242314.66,"tx":4558},
+  {"ds":"2026-02-02","cust":1593,"usd":270644.15,"tx":4874},
+  {"ds":"2026-02-09","cust":1386,"usd":204146.79,"tx":4230},
+  {"ds":"2026-02-16","cust":1320,"usd":212794.83,"tx":4150},
+  {"ds":"2026-02-23","cust":1542,"usd":281445.98,"tx":4956},
+  {"ds":"2026-03-02","cust":1363,"usd":282713.74,"tx":4835},
+  {"ds":"2026-03-09","cust":1306,"usd":227641.53,"tx":4277},
+  {"ds":"2026-03-16","cust":1310,"usd":209212.25,"tx":3995}
+];
+const BUY_WEEKLY_THNDR = [
+  {"ds":"2025-10-27","cust":40,"usd":3638.56,"tx":88},
+  {"ds":"2025-11-03","cust":125,"usd":21470.22,"tx":401},
+  {"ds":"2025-11-10","cust":111,"usd":14979.3,"tx":351},
+  {"ds":"2025-11-17","cust":109,"usd":15951.23,"tx":361},
+  {"ds":"2025-11-24","cust":112,"usd":10836.31,"tx":360},
+  {"ds":"2025-12-01","cust":111,"usd":18942.21,"tx":461},
+  {"ds":"2025-12-08","cust":95,"usd":10374.36,"tx":341},
+  {"ds":"2025-12-15","cust":145,"usd":14700.03,"tx":437},
+  {"ds":"2025-12-22","cust":132,"usd":11840.43,"tx":328},
+  {"ds":"2025-12-29","cust":114,"usd":11148.52,"tx":304},
+  {"ds":"2026-01-05","cust":105,"usd":12332.62,"tx":325},
+  {"ds":"2026-01-12","cust":90,"usd":9562.22,"tx":305},
+  {"ds":"2026-01-19","cust":96,"usd":10194.76,"tx":363},
+  {"ds":"2026-01-26","cust":105,"usd":11616.66,"tx":324},
+  {"ds":"2026-02-02","cust":110,"usd":15407.81,"tx":320},
+  {"ds":"2026-02-09","cust":87,"usd":15006.64,"tx":239},
+  {"ds":"2026-02-16","cust":87,"usd":8768.83,"tx":279},
+  {"ds":"2026-02-23","cust":114,"usd":15637.39,"tx":421},
+  {"ds":"2026-03-02","cust":98,"usd":14310.19,"tx":387},
+  {"ds":"2026-03-09","cust":92,"usd":10992.16,"tx":308},
+  {"ds":"2026-03-16","cust":100,"usd":14990.57,"tx":316}
+];
+const BUY_WEEKLY_ZBD_App = [
+  {"ds":"2025-10-27","cust":541,"usd":60011.26,"tx":1121},
+  {"ds":"2025-11-03","cust":1422,"usd":214540.59,"tx":4499},
+  {"ds":"2025-11-10","cust":1416,"usd":226551.81,"tx":4369},
+  {"ds":"2025-11-17","cust":1488,"usd":247700.38,"tx":4650},
+  {"ds":"2025-11-24","cust":1413,"usd":218696.99,"tx":4661},
+  {"ds":"2025-12-01","cust":1612,"usd":274632.59,"tx":4878},
+  {"ds":"2025-12-08","cust":1404,"usd":192718.75,"tx":4309},
+  {"ds":"2025-12-15","cust":2088,"usd":243536.3,"tx":5380},
+  {"ds":"2025-12-22","cust":1687,"usd":199421.94,"tx":4546},
+  {"ds":"2025-12-29","cust":1698,"usd":244645.72,"tx":4924},
+  {"ds":"2026-01-05","cust":1556,"usd":219084.54,"tx":4584},
+  {"ds":"2026-01-12","cust":1644,"usd":211634.82,"tx":4435},
+  {"ds":"2026-01-19","cust":1591,"usd":217198.3,"tx":4570},
+  {"ds":"2026-01-26","cust":1884,"usd":253609.82,"tx":5083},
+  {"ds":"2026-02-02","cust":1916,"usd":296510.25,"tx":5369},
+  {"ds":"2026-02-09","cust":1662,"usd":248651.68,"tx":4760},
+  {"ds":"2026-02-16","cust":1522,"usd":231633.41,"tx":4397},
+  {"ds":"2026-02-23","cust":1761,"usd":318524.3,"tx":5479},
+  {"ds":"2026-03-02","cust":1487,"usd":259061.6,"tx":4774},
+  {"ds":"2026-03-09","cust":1422,"usd":220619.31,"tx":4333},
+  {"ds":"2026-03-16","cust":1438,"usd":175884.09,"tx":4159}
+];
+const BUY_WEEKLY_ZBD_SDK = [
+  {"ds":"2025-10-27","cust":1,"usd":76.83,"tx":4},
+  {"ds":"2025-11-03","cust":4,"usd":156.02,"tx":4},
+  {"ds":"2025-11-10","cust":4,"usd":205.16,"tx":4},
+  {"ds":"2025-11-17","cust":5,"usd":158.4,"tx":5},
+  {"ds":"2025-11-24","cust":3,"usd":116.95,"tx":6},
+  {"ds":"2025-12-01","cust":5,"usd":213.14,"tx":5},
+  {"ds":"2025-12-08","cust":5,"usd":164.0,"tx":8},
+  {"ds":"2025-12-15","cust":8,"usd":174.51,"tx":16},
+  {"ds":"2025-12-22","cust":4,"usd":357.86,"tx":10},
+  {"ds":"2025-12-29","cust":6,"usd":274.97,"tx":13},
+  {"ds":"2026-01-05","cust":3,"usd":66.2,"tx":8},
+  {"ds":"2026-01-12","cust":6,"usd":253.27,"tx":8},
+  {"ds":"2026-01-19","cust":8,"usd":178.78,"tx":11},
+  {"ds":"2026-01-26","cust":5,"usd":99.58,"tx":8},
+  {"ds":"2026-02-02","cust":6,"usd":434.59,"tx":9},
+  {"ds":"2026-02-09","cust":5,"usd":410.67,"tx":7},
+  {"ds":"2026-02-16","cust":3,"usd":56.6,"tx":4},
+  {"ds":"2026-02-23","cust":6,"usd":392.69,"tx":11},
+  {"ds":"2026-03-02","cust":4,"usd":180.76,"tx":11},
+  {"ds":"2026-03-09","cust":7,"usd":241.66,"tx":17},
+  {"ds":"2026-03-16","cust":5,"usd":229.22,"tx":16}
 ];
 
-const BUY_MONTHLY_DATA = [
-  {"ds":"2025-11-01","cust":3552,"usd":1152816.63,"tx":22288},
-  {"ds":"2025-12-01","cust":4138,"usd":1168377.12,"tx":23635},
-  {"ds":"2026-01-01","cust":3536,"usd":996745.38,"tx":19457},
-  {"ds":"2026-02-01","cust":3212,"usd":958871.56,"tx":17823},
-  {"ds":"2026-03-01","cust":2154,"usd":590657.25,"tx":10644}
+const BUY_MONTHLY_FUMB = [
+  {"ds":"2025-11-01","cust":3593,"usd":1131046.87,"tx":22576},
+  {"ds":"2025-12-01","cust":4201,"usd":1143477.78,"tx":23923},
+  {"ds":"2026-01-01","cust":3587,"usd":977180.93,"tx":19728},
+  {"ds":"2026-02-01","cust":3263,"usd":958543.74,"tx":18094},
+  {"ds":"2026-03-01","cust":2502,"usd":754870.33,"tx":13768}
 ];
+const BUY_MONTHLY_THNDR = [
+  {"ds":"2025-11-01","cust":231,"usd":66875.62,"tx":1561},
+  {"ds":"2025-12-01","cust":256,"usd":62039.0,"tx":1704},
+  {"ds":"2026-01-01","cust":200,"usd":47314.4,"tx":1440},
+  {"ds":"2026-02-01","cust":194,"usd":54634.26,"tx":1268},
+  {"ds":"2026-03-01","cust":165,"usd":41837.74,"tx":1046}
+];
+const BUY_MONTHLY_ZBD_App = [
+  {"ds":"2025-11-01","cust":3242,"usd":967501.03,"tx":19300},
+  {"ds":"2025-12-01","cust":4227,"usd":1025998.92,"tx":21307},
+  {"ds":"2026-01-01","cust":4013,"usd":1001776.35,"tx":20757},
+  {"ds":"2026-02-01","cust":3856,"usd":1086025.69,"tx":19979},
+  {"ds":"2026-03-01","cust":2703,"usd":693566.46,"tx":13937}
+];
+const BUY_MONTHLY_ZBD_SDK = [
+  {"ds":"2025-11-01","cust":8,"usd":713.36,"tx":23},
+  {"ds":"2025-12-01","cust":13,"usd":978.1,"tx":45},
+  {"ds":"2026-01-01","cust":14,"usd":802.97,"tx":41},
+  {"ds":"2026-02-01","cust":13,"usd":1290.79,"tx":31},
+  {"ds":"2026-03-01","cust":9,"usd":656.64,"tx":45}
+];
+
+const PAYOUT_FUMB = [
+  {"ds":"2026-03-17","new":44,"cum":44,"payout":88.0},
+  {"ds":"2026-03-18","new":37,"cum":81,"payout":162.0},
+  {"ds":"2026-03-19","new":66,"cum":147,"payout":294.0},
+  {"ds":"2026-03-20","new":41,"cum":188,"payout":376.0},
+  {"ds":"2026-03-21","new":46,"cum":234,"payout":468.0},
+  {"ds":"2026-03-22","new":27,"cum":261,"payout":522.0}
+];
+const PAYOUT_THNDR = [
+  {"ds":"2026-03-17","new":4,"cum":4,"payout":8.0},
+  {"ds":"2026-03-19","new":2,"cum":6,"payout":12.0},
+  {"ds":"2026-03-20","new":2,"cum":8,"payout":16.0},
+  {"ds":"2026-03-21","new":4,"cum":12,"payout":24.0}
+];
+const PAYOUT_ZBD_App = [
+  {"ds":"2026-03-17","new":48,"cum":48,"payout":96.0},
+  {"ds":"2026-03-18","new":45,"cum":93,"payout":186.0},
+  {"ds":"2026-03-19","new":56,"cum":149,"payout":298.0},
+  {"ds":"2026-03-20","new":38,"cum":187,"payout":374.0},
+  {"ds":"2026-03-21","new":25,"cum":212,"payout":424.0},
+  {"ds":"2026-03-22","new":26,"cum":238,"payout":476.0}
+];
+const PAYOUT_ZBD_SDK = [
+
+];
+
+
+const LN_DATA = {
+  daily:   {FUMB: LN_DAILY_FUMB, THNDR: LN_DAILY_THNDR, 'ZBD-App': LN_DAILY_ZBD_App, 'ZBD-SDK': LN_DAILY_ZBD_SDK},
+  weekly:  {FUMB: LN_WEEKLY_FUMB, THNDR: LN_WEEKLY_THNDR, 'ZBD-App': LN_WEEKLY_ZBD_App, 'ZBD-SDK': LN_WEEKLY_ZBD_SDK},
+  monthly: {FUMB: LN_MONTHLY_FUMB, THNDR: LN_MONTHLY_THNDR, 'ZBD-App': LN_MONTHLY_ZBD_App, 'ZBD-SDK': LN_MONTHLY_ZBD_SDK}
+};
+const BUY_DATA = {
+  daily:   {FUMB: BUY_DAILY_FUMB, THNDR: BUY_DAILY_THNDR, 'ZBD-App': BUY_DAILY_ZBD_App, 'ZBD-SDK': BUY_DAILY_ZBD_SDK},
+  weekly:  {FUMB: BUY_WEEKLY_FUMB, THNDR: BUY_WEEKLY_THNDR, 'ZBD-App': BUY_WEEKLY_ZBD_App, 'ZBD-SDK': BUY_WEEKLY_ZBD_SDK},
+  monthly: {FUMB: BUY_MONTHLY_FUMB, THNDR: BUY_MONTHLY_THNDR, 'ZBD-App': BUY_MONTHLY_ZBD_App, 'ZBD-SDK': BUY_MONTHLY_ZBD_SDK}
+};
 
 const NOW = new Date();
 document.getElementById('refresh-ts').textContent =
   NOW.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) +
   ' ' + NOW.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-function countDailyInBucket(bucketStart, gran) {
-  return DAILY_DATA.filter(r => {
-    if (gran === 'weekly') {
-      const bStart = new Date(bucketStart + 'T00:00:00');
-      const bEnd = new Date(bStart); bEnd.setDate(bEnd.getDate() + 7);
-      const d = new Date(r.ds + 'T00:00:00');
-      return d >= bStart && d < bEnd;
-    }
-    return r.ds.slice(0, 7) === bucketStart.slice(0, 7);
-  }).length;
-}
-
-function expectedDays(bucketStart, gran) {
-  if (gran === 'weekly') return 7;
-  const dt = new Date(bucketStart + 'T00:00:00');
-  return new Date(dt.getFullYear(), dt.getMonth() + 1, 0).getDate();
-}
-
-function aggregate(gran) {
-  if (gran === 'daily') return DAILY_DATA.map(r => ({ label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: false }));
-  const src = gran === 'weekly' ? WEEKLY_DATA : MONTHLY_DATA;
-  return src.map(r => {
-    const actual = countDailyInBucket(r.ds, gran);
-    const expected = expectedDays(r.ds, gran);
-    return { label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: actual < expected };
+function getAllDates(partnerData) {
+  const dateSet = new Set();
+  PARTNERS.forEach(p => {
+    (partnerData[p] || []).forEach(r => dateSet.add(r.ds));
   });
-}
-
-function aggregateBuy(gran) {
-  if (gran === 'daily') return BUY_DAILY_DATA.map(r => ({ label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: false }));
-  const src = gran === 'weekly' ? BUY_WEEKLY_DATA : BUY_MONTHLY_DATA;
-  return src.map(r => {
-    const actual = countDailyInBucket(r.ds, gran);
-    const expected = expectedDays(r.ds, gran);
-    return { label: r.ds, usd: r.usd, cust: r.cust, tx: r.tx, partial: actual < expected };
-  });
+  return [...dateSet].sort();
 }
 
 function fmtUsd(v) {
@@ -592,70 +1510,107 @@ function fmtNum(v) {
   if (v >= 1000) return (v / 1000).toFixed(1) + 'K';
   return v.toLocaleString();
 }
-function fmtLabel(label, gran) {
-  const dt = new Date(label + 'T00:00:00');
-  if (gran === 'monthly') {
-    return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-  }
-  if (gran === 'weekly') {
-    return 'w/o ' + dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
+function fmtLabel(ds, gran) {
+  const dt = new Date(ds + 'T00:00:00');
+  if (gran === 'monthly') return dt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  if (gran === 'weekly') return 'w/o ' + dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   return dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
-let chartVol, chartCust, chartTx, chartBuyCust, chartBuyTx, chartBuyVol;
+let chartLnVol, chartLnCust, chartLnTx, chartBuyCust, chartBuyTx, chartBuyVol, chartPayoutCust, chartPayoutCum;
+let currentGran = 'daily';
+let currentRangeWeeks = 0;
+const partnerVisible = {FUMB: true, THNDR: true, 'ZBD-App': true, 'ZBD-SDK': true};
 
-function makeChart(canvasId, data, labels, label, color, formatFn, gran, partialFlags) {
+function filterDatesByRange(dates) {
+  if (currentRangeWeeks === 0 || dates.length === 0) return dates;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - currentRangeWeeks * 7);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  return dates.filter(d => d >= cutoffStr);
+}
+
+function filterDataByRange(partnerData) {
+  if (currentRangeWeeks === 0) return partnerData;
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - currentRangeWeeks * 7);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
+  const filtered = {};
+  for (const p of PARTNERS) {
+    filtered[p] = (partnerData[p] || []).filter(r => r.ds >= cutoffStr);
+  }
+  return filtered;
+}
+
+function buildPartnerLegend(elementId) {
+  document.getElementById(elementId).innerHTML = PARTNERS.map(p =>
+    `<div class="legend-item ${partnerVisible[p] ? '' : 'dimmed'}" onclick="togglePartner('${p}')"><div class="legend-swatch" style="background:${PARTNER_COLORS[p]}"></div>${p}</div>`
+  ).join('');
+}
+
+window.togglePartner = function(key) {
+  const othersHidden = PARTNERS.filter(k => k !== key).every(k => !partnerVisible[k]);
+  if (partnerVisible[key] && othersHidden) return;
+  partnerVisible[key] = !partnerVisible[key];
+  render(currentGran);
+};
+
+function makeMultiChart(canvasId, allDates, partnerData, field, formatFn, gran) {
   const ctx = document.getElementById(canvasId).getContext('2d');
-  const showAllLabels = gran === 'weekly' || gran === 'monthly';
-  const bgColors = partialFlags.map(p => p ? color + '40' : color + 'cc');
-  const borderColors = partialFlags.map(p => p ? color + '80' : color);
-  const borderStyles = partialFlags.map(p => p ? [4, 4] : undefined);
+  const labels = allDates.map(d => fmtLabel(d, gran));
+  const showLabels = gran === 'weekly' || gran === 'monthly';
+  const totalBars = allDates.length;
+
+  const visiblePartners = PARTNERS.filter(p => partnerVisible[p]);
+  const datasets = visiblePartners.map(p => {
+    const arr = partnerData[p] || [];
+    const dateMap = {};
+    arr.forEach(r => { dateMap[r.ds] = r[field]; });
+    const data = allDates.map(d => dateMap[d] || 0);
+    const color = PARTNER_COLORS[p];
+    return {
+      label: p,
+      data: data,
+      backgroundColor: color + 'cc',
+      borderColor: '#ffffff',
+      borderWidth: { top: 0, right: 0, bottom: 0, left: 0 },
+      borderSkipped: 'start',
+      maxBarThickness: 48
+    };
+  });
+
   return new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: label,
-        data: data,
-        backgroundColor: bgColors,
-        borderColor: borderColors,
-        borderWidth: 1,
-        borderRadius: 3,
-        maxBarThickness: 40
-      }]
-    },
+    data: { labels, datasets },
     plugins: [ChartDataLabels],
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
+        tooltip: { mode: 'index', intersect: false, callbacks: { label: ctx => ctx.dataset.label + ': ' + formatFn(ctx.parsed.y), footer: items => items.length > 1 ? 'Total: ' + formatFn(items.reduce((s, i) => s + i.parsed.y, 0)) : '' } },
         datalabels: {
+          display: function(ctx) {
+            if (ctx.datasetIndex !== ctx.chart.data.datasets.length - 1) return false;
+            if (showLabels) return true;
+            if (totalBars <= 20) return true;
+            return ctx.dataIndex % Math.ceil(totalBars / 15) === 0;
+          },
           anchor: 'end',
           align: 'end',
           offset: 2,
-          font: { size: showAllLabels ? 11 : 10, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
-          color: '#1a1a2e',
-          formatter: (v) => formatFn(v),
-          display: function(ctx) {
-            if (showAllLabels) return true;
-            const total = ctx.dataset.data.length;
-            if (total <= 20) return true;
-            return ctx.dataIndex % Math.ceil(total / 20) === 0;
+          font: { size: showLabels ? 10 : 9, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#374151',
+          formatter: function(value, ctx) {
+            let total = 0;
+            ctx.chart.data.datasets.forEach(ds => { total += ds.data[ctx.dataIndex] || 0; });
+            return total === 0 ? '' : formatFn(total);
           }
         }
       },
       scales: {
-        x: {
-          grid: { display: false },
-          ticks: { font: { size: 10 }, color: '#6b7280', maxRotation: 45, autoSkip: !showAllLabels, maxTicksLimit: showAllLabels ? 50 : 20 }
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: '#eef0f3' },
-          ticks: { font: { size: 10 }, color: '#6b7280', callback: (v) => formatFn(v) }
-        }
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280', maxRotation: 45, autoSkip: !showLabels, maxTicksLimit: showLabels ? 50 : 20 } },
+        y: { stacked: true, beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => formatFn(v) } }
       },
       interaction: { intersect: false, mode: 'index' },
       animation: { duration: 400 }
@@ -665,23 +1620,21 @@ function makeChart(canvasId, data, labels, label, color, formatFn, gran, partial
 
 function updateStats(rows, gran) {
   const grid = document.getElementById('stats-grid');
+  if (!rows.length) { grid.innerHTML = ''; return; }
   const totalUsd = rows.reduce((s, r) => s + r.usd, 0);
-  const totalCust = rows.reduce((s, r) => s + r.cust, 0);
   const totalTx = rows.reduce((s, r) => s + r.tx, 0);
-  const totalDays = DAILY_DATA.length;
+  const totalDays = LN_DAILY_FUMB.length;
   const avgDailyUsd = totalUsd / totalDays;
-  const avgDailyCust = totalCust / totalDays;
 
-  const complete = rows.filter(r => !r.partial);
-  const latest = complete[complete.length - 1];
-  const prev = complete.length > 1 ? complete[complete.length - 2] : null;
+  const latest = rows[rows.length - 1];
+  const prev = rows.length > 1 ? rows[rows.length - 2] : null;
   const volChg = prev ? ((latest.usd - prev.usd) / prev.usd * 100) : 0;
   const custChg = prev ? ((latest.cust - prev.cust) / prev.cust * 100) : 0;
-  const latestLabel = fmtLabel(latest.label, gran);
+  const latestLabel = fmtLabel(latest.ds, gran);
 
   grid.innerHTML = `
     <div class="stat-card">
-      <div class="stat-label">Total Volume</div>
+      <div class="stat-label">Total Volume (FUMB)</div>
       <div class="stat-value">${fmtUsd(totalUsd)}</div>
       <div class="stat-sub" style="color: var(--text-muted)">Since Nov 2025</div>
     </div>
@@ -712,16 +1665,14 @@ function updateStats(rows, gran) {
 function updateTable(rows, gran) {
   const tbody = document.querySelector('#data-table tbody');
   const reversed = [...rows].reverse();
-
   let html = '';
   reversed.forEach((r, i) => {
     const prev = i < reversed.length - 1 ? reversed[i + 1] : null;
     const pctVol = prev ? ((r.usd - prev.usd) / prev.usd * 100) : 0;
     const pctClass = pctVol >= 0 ? 'pct-up' : 'pct-down';
     const pctStr = prev ? `<span class="${pctClass}">${pctVol >= 0 ? '+' : ''}${pctVol.toFixed(1)}%</span>` : '—';
-    const partialTag = r.partial ? ' <span style="font-size:0.65rem;color:var(--text-muted);font-style:italic">(partial)</span>' : '';
-    html += `<tr${r.partial ? ' style="opacity:0.55"' : ''}>
-      <td>${fmtLabel(r.label, gran)}${partialTag}</td>
+    html += `<tr>
+      <td>${fmtLabel(r.ds, gran)}</td>
       <td>${fmtUsd(r.usd)}</td>
       <td>${fmtNum(r.cust)}</td>
       <td>${fmtNum(r.tx)}</td>
@@ -734,16 +1685,14 @@ function updateTable(rows, gran) {
 function updateBuyTable(rows, gran) {
   const tbody = document.querySelector('#buy-data-table tbody');
   const reversed = [...rows].reverse();
-
   let html = '';
   reversed.forEach((r, i) => {
     const prev = i < reversed.length - 1 ? reversed[i + 1] : null;
     const pctVol = prev ? ((r.usd - prev.usd) / prev.usd * 100) : 0;
     const pctClass = pctVol >= 0 ? 'pct-up' : 'pct-down';
     const pctStr = prev ? `<span class="${pctClass}">${pctVol >= 0 ? '+' : ''}${pctVol.toFixed(1)}%</span>` : '—';
-    const partialTag = r.partial ? ' <span style="font-size:0.65rem;color:var(--text-muted);font-style:italic">(partial)</span>' : '';
-    html += `<tr${r.partial ? ' style="opacity:0.55"' : ''}>
-      <td>${fmtLabel(r.label, gran)}${partialTag}</td>
+    html += `<tr>
+      <td>${fmtLabel(r.ds, gran)}</td>
       <td>${fmtUsd(r.usd)}</td>
       <td>${fmtNum(r.cust)}</td>
       <td>${fmtNum(r.tx)}</td>
@@ -753,38 +1702,236 @@ function updateBuyTable(rows, gran) {
   tbody.innerHTML = html;
 }
 
+function aggregatePayoutByGran(dailyArr, gran) {
+  if (gran === 'daily' || !dailyArr.length) return dailyArr;
+  const groups = {};
+  dailyArr.forEach(r => {
+    const dt = new Date(r.ds + 'T00:00:00');
+    let key;
+    if (gran === 'weekly') {
+      const day = dt.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(dt);
+      monday.setDate(dt.getDate() + diff);
+      key = monday.toISOString().slice(0, 10);
+    } else {
+      key = r.ds.slice(0, 7) + '-01';
+    }
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+  return Object.keys(groups).sort().map(key => {
+    const rows = groups[key];
+    const lastRow = rows[rows.length - 1];
+    return { ds: key, new: rows.reduce((s, r) => s + r.new, 0), cum: lastRow.cum, payout: lastRow.payout };
+  });
+}
+
+function renderPayout(gran) {
+  if (chartPayoutCust) chartPayoutCust.destroy();
+  if (chartPayoutCum) chartPayoutCum.destroy();
+
+  const granLabels = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+  document.getElementById('payout-cust-title').textContent = 'New Qualifying Customers (' + granLabels[gran] + ')';
+
+  const allPayoutData = {
+    FUMB: aggregatePayoutByGran(PAYOUT_FUMB, gran),
+    THNDR: aggregatePayoutByGran(PAYOUT_THNDR, gran),
+    'ZBD-App': aggregatePayoutByGran(PAYOUT_ZBD_App, gran),
+    'ZBD-SDK': aggregatePayoutByGran(PAYOUT_ZBD_SDK, gran)
+  };
+  const allDates = getAllDates(allPayoutData);
+  const labels = allDates.map(d => fmtLabel(d, gran));
+
+  const visiblePartners = PARTNERS.filter(p => partnerVisible[p]);
+
+  const custDatasets = visiblePartners.map(p => {
+    const arr = allPayoutData[p] || [];
+    const dateMap = {};
+    arr.forEach(r => { dateMap[r.ds] = r.new; });
+    const data = allDates.map(d => dateMap[d] || 0);
+    const color = PARTNER_COLORS[p];
+    return {
+      label: p,
+      data: data,
+      backgroundColor: color + 'cc',
+      borderColor: '#ffffff',
+      borderWidth: 0,
+      maxBarThickness: 48
+    };
+  });
+
+  const custCtx = document.getElementById('chart-payout-cust').getContext('2d');
+  chartPayoutCust = new Chart(custCtx, {
+    type: 'bar',
+    data: { labels, datasets: custDatasets },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { mode: 'index', intersect: false, callbacks: { footer: items => items.length > 1 ? 'Total: ' + fmtNum(items.reduce((s, i) => s + i.parsed.y, 0)) : '' } },
+        datalabels: {
+          display: function(ctx) {
+            return ctx.datasetIndex === ctx.chart.data.datasets.length - 1;
+          },
+          anchor: 'end', align: 'end', offset: 2,
+          font: { size: 11, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#374151',
+          formatter: function(value, ctx) {
+            let total = 0;
+            ctx.chart.data.datasets.forEach(ds => { total += ds.data[ctx.dataIndex] || 0; });
+            return total === 0 ? '' : fmtNum(total);
+          }
+        }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { stacked: true, beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => fmtNum(v) } }
+      },
+      interaction: { intersect: false, mode: 'index' },
+      animation: { duration: 400 }
+    }
+  });
+
+  buildPartnerLegend('legend-payout-cust');
+
+  const cumDatasets = visiblePartners.map(p => {
+    const arr = allPayoutData[p] || [];
+    const dateMap = {};
+    arr.forEach(r => { dateMap[r.ds] = r.payout; });
+    const data = allDates.map(d => dateMap[d] || 0);
+    const color = PARTNER_COLORS[p];
+    return {
+      label: p,
+      data: data,
+      borderColor: color,
+      backgroundColor: color + '1a',
+      fill: false,
+      tension: 0.3,
+      pointRadius: 4,
+      pointBackgroundColor: color,
+      borderWidth: 2
+    };
+  });
+
+  const cumCtx = document.getElementById('chart-payout-cum').getContext('2d');
+  chartPayoutCum = new Chart(cumCtx, {
+    type: 'line',
+    data: { labels, datasets: cumDatasets },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'end', offset: 4,
+          font: { size: 11, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#1a1a2e',
+          formatter: v => v === 0 ? '' : fmtUsd(v)
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => fmtUsd(v) } }
+      },
+      animation: { duration: 400 }
+    }
+  });
+
+  buildPartnerLegend('legend-payout-cum');
+
+  const totalCum = PARTNERS.reduce((s, p) => {
+    const arr = allPayoutData[p] || [];
+    return s + (arr.length ? arr[arr.length - 1].cum : 0);
+  }, 0);
+  const totalPayout = totalCum * 2;
+  const totalNew = PARTNERS.reduce((s, p) => {
+    const arr = allPayoutData[p] || [];
+    return s + (arr.length ? arr[arr.length - 1].new : 0);
+  }, 0);
+  const latestDate = allDates.length ? allDates[allDates.length - 1] : '';
+
+  document.getElementById('payout-stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Qualifying Customers</div>
+      <div class="stat-value">${fmtNum(totalCum)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">All partners · Since Mar 17, 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Payout</div>
+      <div class="stat-value">${fmtUsd(totalPayout)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">@ $2 per customer</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">New Today (All Partners)</div>
+      <div class="stat-value">${fmtNum(totalNew)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">${latestDate ? fmtLabel(latestDate, 'daily') : ''}</div>
+    </div>
+  `;
+
+  const tbody = document.querySelector('#payout-data-table tbody');
+  let html = '';
+  [...allDates].reverse().forEach(d => {
+    const fumb = allPayoutData.FUMB.find(r => r.ds === d) || {};
+    const thndr = allPayoutData.THNDR.find(r => r.ds === d) || {};
+    const zbdApp = allPayoutData['ZBD-App'].find(r => r.ds === d) || {};
+    const zbdSdk = allPayoutData['ZBD-SDK'].find(r => r.ds === d) || {};
+    const cumAll = (fumb.cum || 0) + (thndr.cum || 0) + (zbdApp.cum || 0) + (zbdSdk.cum || 0);
+    html += `<tr>
+      <td>${fmtLabel(d, gran)}</td>
+      <td>${fmtNum(fumb.new || 0)}</td>
+      <td>${fmtNum(thndr.new || 0)}</td>
+      <td>${fmtNum(zbdApp.new || 0)}</td>
+      <td>${fmtNum(zbdSdk.new || 0)}</td>
+      <td>${fmtNum(cumAll)}</td>
+      <td>${fmtUsd(cumAll * 2)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
 function render(gran) {
-  const rows = aggregate(gran);
-  const labels = rows.map(r => fmtLabel(r.label, gran));
-  const volData = rows.map(r => r.usd);
-  const custData = rows.map(r => r.cust);
-  const txData = rows.map(r => r.tx);
+  currentGran = gran;
 
-  if (chartVol) chartVol.destroy();
-  if (chartCust) chartCust.destroy();
-  if (chartTx) chartTx.destroy();
+  const lnData = filterDataByRange(LN_DATA[gran]);
+  const allLnDates = getAllDates(lnData);
 
-  const partials = rows.map(r => r.partial);
-  chartVol = makeChart('chart-volume', volData, labels, 'Volume (USD)', '#1a73e8', fmtUsd, gran, partials);
-  chartCust = makeChart('chart-customers', custData, labels, 'Customers', '#16a34a', fmtNum, gran, partials);
-  chartTx = makeChart('chart-tx', txData, labels, 'Transactions', '#f7931a', fmtNum, gran, partials);
+  if (chartLnVol) chartLnVol.destroy();
+  if (chartLnCust) chartLnCust.destroy();
+  if (chartLnTx) chartLnTx.destroy();
 
-  updateStats(rows, gran);
-  updateTable(rows, gran);
+  chartLnVol = makeMultiChart('chart-volume', allLnDates, lnData, 'usd', fmtUsd, gran);
+  chartLnCust = makeMultiChart('chart-customers', allLnDates, lnData, 'cust', fmtNum, gran);
+  chartLnTx = makeMultiChart('chart-tx', allLnDates, lnData, 'tx', fmtNum, gran);
 
-  const buyRows = aggregateBuy(gran);
-  const buyLabels = buyRows.map(r => fmtLabel(r.label, gran));
-  const buyPartials = buyRows.map(r => r.partial);
+  buildPartnerLegend('legend-ln-vol');
+  buildPartnerLegend('legend-ln-cust');
+  buildPartnerLegend('legend-ln-tx');
+
+  updateStats(lnData.FUMB || [], gran);
+  updateTable(lnData.FUMB || [], gran);
+
+  const buyData = filterDataByRange(BUY_DATA[gran]);
+  const allBuyDates = getAllDates(buyData);
 
   if (chartBuyCust) chartBuyCust.destroy();
   if (chartBuyTx) chartBuyTx.destroy();
   if (chartBuyVol) chartBuyVol.destroy();
 
-  chartBuyCust = makeChart('chart-buy-cust', buyRows.map(r => r.cust), buyLabels, 'Buyers', '#7c3aed', fmtNum, gran, buyPartials);
-  chartBuyTx = makeChart('chart-buy-tx', buyRows.map(r => r.tx), buyLabels, 'Transactions', '#0891b2', fmtNum, gran, buyPartials);
-  chartBuyVol = makeChart('chart-buy-vol', buyRows.map(r => r.usd), buyLabels, 'Buy GTV', '#059669', fmtUsd, gran, buyPartials);
+  chartBuyCust = makeMultiChart('chart-buy-cust', allBuyDates, buyData, 'cust', fmtNum, gran);
+  chartBuyTx = makeMultiChart('chart-buy-tx', allBuyDates, buyData, 'tx', fmtNum, gran);
+  chartBuyVol = makeMultiChart('chart-buy-vol', allBuyDates, buyData, 'usd', fmtUsd, gran);
 
-  updateBuyTable(buyRows, gran);
+  buildPartnerLegend('legend-buy-cust');
+  buildPartnerLegend('legend-buy-tx');
+  buildPartnerLegend('legend-buy-vol');
+
+  updateBuyTable((buyData.FUMB || []), gran);
+
+  renderPayout(gran);
 }
 
 document.getElementById('granularity-toggle').addEventListener('click', e => {
@@ -793,6 +1940,15 @@ document.getElementById('granularity-toggle').addEventListener('click', e => {
   document.querySelectorAll('#granularity-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   render(btn.dataset.gran);
+});
+
+document.getElementById('range-toggle').addEventListener('click', e => {
+  const btn = e.target.closest('.toggle-btn');
+  if (!btn) return;
+  document.querySelectorAll('#range-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentRangeWeeks = parseInt(btn.dataset.range);
+  render(currentGran);
 });
 
 render('daily');
