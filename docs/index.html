@@ -146,11 +146,106 @@
     </div>
   </div>
 
+  <div style="margin: 44px 0 10px; padding-top: 28px; border-top: 2px solid var(--border);">
+    <h2 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;">Payout Tracker</h2>
+    <p style="font-size: 0.82rem; color: var(--blue-dark); font-style: italic; font-weight: 600;">$2 per unique customer who receives a lightning deposit and subsequently makes a BTC buy &middot; Program start: Mar 17, 2026</p>
+  </div>
+
+  <div class="stats-grid" id="payout-stats-grid"></div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title" id="payout-cust-title">New Qualifying Customers (Daily)</div>
+        <div class="chart-subtitle">First-time converters: LN deposit &rarr; BTC buy, both on/after Mar 17 (each customer counted once)</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-payout-cust"></canvas></div>
+  </div>
+
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Cumulative Payout</div>
+        <div class="chart-subtitle">Running total of $2 &times; qualifying customers</div>
+      </div>
+    </div>
+    <div class="chart-canvas-container"><canvas id="chart-payout-cum"></canvas></div>
+  </div>
+
+  <div class="data-table-wrap">
+    <h3>Payout Tracker — Data Table</h3>
+    <div style="max-height: 480px; overflow-y: auto;">
+      <table class="data-tbl" id="payout-data-table">
+        <thead><tr><th>Period</th><th>New Customers</th><th>Cumulative</th><th>Payout</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
   <footer>Cash App x FUMB Lightning Deposits</footer>
 </div>
 
 <script>
 const DAILY_DATA = [
+  {"ds":"2025-09-04","cust":1265,"usd":223.76,"tx":1588},
+  {"ds":"2025-09-05","cust":1487,"usd":263.73,"tx":1871},
+  {"ds":"2025-09-06","cust":1362,"usd":241.99,"tx":1740},
+  {"ds":"2025-09-07","cust":1474,"usd":252.93,"tx":1921},
+  {"ds":"2025-09-08","cust":1565,"usd":291.67,"tx":2013},
+  {"ds":"2025-09-09","cust":1475,"usd":264.2,"tx":1916},
+  {"ds":"2025-09-10","cust":1366,"usd":244.43,"tx":1727},
+  {"ds":"2025-09-11","cust":1436,"usd":271.82,"tx":1780},
+  {"ds":"2025-09-12","cust":1493,"usd":256.49,"tx":1858},
+  {"ds":"2025-09-13","cust":1323,"usd":239.51,"tx":1699},
+  {"ds":"2025-09-14","cust":1452,"usd":255.99,"tx":1846},
+  {"ds":"2025-09-15","cust":1489,"usd":274.75,"tx":1887},
+  {"ds":"2025-09-16","cust":1402,"usd":249.22,"tx":1800},
+  {"ds":"2025-09-17","cust":1377,"usd":246.41,"tx":1702},
+  {"ds":"2025-09-18","cust":1462,"usd":272.21,"tx":1850},
+  {"ds":"2025-09-19","cust":1458,"usd":261.6,"tx":1801},
+  {"ds":"2025-09-20","cust":1357,"usd":242.83,"tx":1719},
+  {"ds":"2025-09-21","cust":1459,"usd":251.81,"tx":1875},
+  {"ds":"2025-09-22","cust":1572,"usd":272.51,"tx":1978},
+  {"ds":"2025-09-23","cust":1479,"usd":233.29,"tx":1833},
+  {"ds":"2025-09-24","cust":1474,"usd":249.86,"tx":1893},
+  {"ds":"2025-09-25","cust":1503,"usd":254.24,"tx":1878},
+  {"ds":"2025-09-26","cust":1503,"usd":232.5,"tx":1901},
+  {"ds":"2025-09-27","cust":1489,"usd":235.22,"tx":1922},
+  {"ds":"2025-09-28","cust":1591,"usd":259.07,"tx":2011},
+  {"ds":"2025-09-29","cust":1545,"usd":264.34,"tx":1969},
+  {"ds":"2025-09-30","cust":1524,"usd":253.41,"tx":1981},
+  {"ds":"2025-10-01","cust":1483,"usd":258.78,"tx":1941},
+  {"ds":"2025-10-02","cust":1590,"usd":290.05,"tx":2095},
+  {"ds":"2025-10-03","cust":1536,"usd":273.72,"tx":1998},
+  {"ds":"2025-10-04","cust":1546,"usd":271.14,"tx":2056},
+  {"ds":"2025-10-05","cust":1711,"usd":308.83,"tx":2306},
+  {"ds":"2025-10-06","cust":1700,"usd":312.14,"tx":2229},
+  {"ds":"2025-10-07","cust":1641,"usd":286.22,"tx":2155},
+  {"ds":"2025-10-08","cust":1607,"usd":291.29,"tx":2098},
+  {"ds":"2025-10-09","cust":1688,"usd":322.53,"tx":2191},
+  {"ds":"2025-10-10","cust":1573,"usd":278.96,"tx":1948},
+  {"ds":"2025-10-11","cust":1447,"usd":255.67,"tx":1868},
+  {"ds":"2025-10-12","cust":1550,"usd":279.19,"tx":1984},
+  {"ds":"2025-10-13","cust":1688,"usd":297.66,"tx":2141},
+  {"ds":"2025-10-14","cust":1638,"usd":277.97,"tx":2035},
+  {"ds":"2025-10-15","cust":1609,"usd":271.4,"tx":2027},
+  {"ds":"2025-10-16","cust":1567,"usd":265.33,"tx":1948},
+  {"ds":"2025-10-17","cust":1568,"usd":256.38,"tx":1933},
+  {"ds":"2025-10-18","cust":1489,"usd":237.74,"tx":1874},
+  {"ds":"2025-10-19","cust":1550,"usd":267.05,"tx":1926},
+  {"ds":"2025-10-20","cust":1614,"usd":281.74,"tx":2048},
+  {"ds":"2025-10-21","cust":1616,"usd":283.19,"tx":2014},
+  {"ds":"2025-10-22","cust":1526,"usd":255.51,"tx":1910},
+  {"ds":"2025-10-23","cust":1481,"usd":251.88,"tx":1822},
+  {"ds":"2025-10-24","cust":1377,"usd":230.85,"tx":1692},
+  {"ds":"2025-10-25","cust":1307,"usd":244.04,"tx":1698},
+  {"ds":"2025-10-26","cust":1498,"usd":279.03,"tx":1895},
+  {"ds":"2025-10-27","cust":1661,"usd":317.5,"tx":2096},
+  {"ds":"2025-10-28","cust":1554,"usd":284.72,"tx":1915},
+  {"ds":"2025-10-29","cust":1493,"usd":270.26,"tx":1876},
+  {"ds":"2025-10-30","cust":1594,"usd":291.39,"tx":2004},
+  {"ds":"2025-10-31","cust":1454,"usd":254.95,"tx":1781},
   {"ds":"2025-11-01","cust":1383,"usd":254.24,"tx":1739},
   {"ds":"2025-11-02","cust":1472,"usd":257.15,"tx":1847},
   {"ds":"2025-11-03","cust":1686,"usd":293.48,"tx":2092},
@@ -296,8 +391,17 @@ const DAILY_DATA = [
 ];
 
 
+
 const WEEKLY_DATA = [
-  {"ds":"2025-10-27","cust":2305,"usd":511.39,"tx":3586},
+  {"ds":"2025-09-01","cust":3324,"usd":982.41,"tx":7120},
+  {"ds":"2025-09-08","cust":4401,"usd":1824.11,"tx":12839},
+  {"ds":"2025-09-15","cust":4345,"usd":1798.83,"tx":12634},
+  {"ds":"2025-09-22","cust":4800,"usd":1736.69,"tx":13416},
+  {"ds":"2025-09-29","cust":4799,"usd":1920.27,"tx":14346},
+  {"ds":"2025-10-06","cust":4733,"usd":2026.0,"tx":14473},
+  {"ds":"2025-10-13","cust":4723,"usd":1873.53,"tx":13884},
+  {"ds":"2025-10-20","cust":4492,"usd":1826.24,"tx":13079},
+  {"ds":"2025-10-27","cust":4526,"usd":1930.21,"tx":13258},
   {"ds":"2025-11-03","cust":4570,"usd":1804.56,"tx":13478},
   {"ds":"2025-11-10","cust":4628,"usd":1737.11,"tx":13285},
   {"ds":"2025-11-17","cust":4853,"usd":1548.23,"tx":13582},
@@ -321,13 +425,17 @@ const WEEKLY_DATA = [
 ];
 
 
+
 const MONTHLY_DATA = [
+  {"ds":"2025-09-01","cust":8818,"usd":6859.79,"tx":49959},
+  {"ds":"2025-10-01","cust":9329,"usd":8547.11,"tx":61504},
   {"ds":"2025-11-01","cust":9293,"usd":7139.69,"tx":57611},
   {"ds":"2025-12-01","cust":10066,"usd":7015.04,"tx":62306},
   {"ds":"2026-01-01","cust":10162,"usd":7165.54,"tx":60313},
   {"ds":"2026-02-01","cust":8229,"usd":4063.72,"tx":44307},
   {"ds":"2026-03-01","cust":5991,"usd":2772.49,"tx":26634}
 ];
+
 
 
 const NOW = new Date();
@@ -533,15 +641,178 @@ function render(gran) {
   updateTable(rows, gran);
 }
 
+const PAYOUT_DATA = [
+  {"ds":"2026-03-17","new":28,"cum":28,"payout":56.0},
+  {"ds":"2026-03-18","new":32,"cum":60,"payout":120.0},
+  {"ds":"2026-03-19","new":32,"cum":92,"payout":184.0},
+  {"ds":"2026-03-20","new":35,"cum":127,"payout":254.0},
+  {"ds":"2026-03-21","new":32,"cum":159,"payout":318.0},
+  {"ds":"2026-03-22","new":22,"cum":181,"payout":362.0}
+];
+
+let chartPayoutCust, chartPayoutCum;
+
+function aggregatePayoutByGran(dailyArr, gran) {
+  if (gran === 'daily' || !dailyArr.length) return dailyArr;
+  const groups = {};
+  dailyArr.forEach(r => {
+    const dt = new Date(r.ds + 'T00:00:00');
+    let key;
+    if (gran === 'weekly') {
+      const day = dt.getDay();
+      const diff = day === 0 ? -6 : 1 - day;
+      const monday = new Date(dt);
+      monday.setDate(dt.getDate() + diff);
+      key = monday.toISOString().slice(0, 10);
+    } else {
+      key = r.ds.slice(0, 7) + '-01';
+    }
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(r);
+  });
+  return Object.keys(groups).sort().map(key => {
+    const rows = groups[key];
+    const lastRow = rows[rows.length - 1];
+    return { ds: key, new: rows.reduce((s, r) => s + r.new, 0), cum: lastRow.cum, payout: lastRow.payout };
+  });
+}
+
+function renderPayout(gran) {
+  if (chartPayoutCust) chartPayoutCust.destroy();
+  if (chartPayoutCum) chartPayoutCum.destroy();
+
+  const granLabels = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+  document.getElementById('payout-cust-title').textContent = 'New Qualifying Customers (' + granLabels[gran] + ')';
+
+  const data = aggregatePayoutByGran(PAYOUT_DATA, gran);
+  const labels = data.map(r => fmtLabel(r.ds, gran));
+  const newCustValues = data.map(r => r.new);
+  const cumPayoutValues = data.map(r => r.payout);
+
+  const custCtx = document.getElementById('chart-payout-cust').getContext('2d');
+  chartPayoutCust = new Chart(custCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'New Customers',
+        data: newCustValues,
+        backgroundColor: '#1a73e8cc',
+        borderColor: '#1a73e8',
+        borderWidth: 1,
+        borderRadius: 3,
+        maxBarThickness: 40
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'end', offset: 2,
+          font: { size: 11, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#374151',
+          formatter: v => v === 0 ? '' : fmtNum(v)
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => fmtNum(v) } }
+      },
+      animation: { duration: 400 }
+    }
+  });
+
+  const cumCtx = document.getElementById('chart-payout-cum').getContext('2d');
+  chartPayoutCum = new Chart(cumCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Cumulative Payout',
+        data: cumPayoutValues,
+        borderColor: '#1a73e8',
+        backgroundColor: '#1a73e81a',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 5,
+        pointBackgroundColor: '#1a73e8',
+        borderWidth: 2.5
+      }]
+    },
+    plugins: [ChartDataLabels],
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'end', offset: 4,
+          font: { size: 11, weight: 600, family: '-apple-system, BlinkMacSystemFont, sans-serif' },
+          color: '#1a1a2e',
+          formatter: v => v === 0 ? '' : fmtUsd(v)
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#6b7280' } },
+        y: { beginAtZero: true, grid: { color: '#eef0f3' }, ticks: { font: { size: 10 }, color: '#6b7280', callback: v => fmtUsd(v) } }
+      },
+      animation: { duration: 400 }
+    }
+  });
+
+  const totalCum = data.length ? data[data.length - 1].cum : 0;
+  const totalPayout = totalCum * 2;
+  const latestNew = data.length ? data[data.length - 1].new : 0;
+  const latestDate = data.length ? data[data.length - 1].ds : '';
+
+  document.getElementById('payout-stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Qualifying Customers</div>
+      <div class="stat-value">${fmtNum(totalCum)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">Since Mar 17, 2026</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Payout</div>
+      <div class="stat-value">${fmtUsd(totalPayout)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">@ $2 per customer</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Latest Period New</div>
+      <div class="stat-value">${fmtNum(latestNew)}</div>
+      <div class="stat-sub" style="color: var(--text-muted)">${latestDate ? fmtLabel(latestDate, gran) : ''}</div>
+    </div>
+  `;
+
+  const tbody = document.querySelector('#payout-data-table tbody');
+  let html = '';
+  [...data].reverse().forEach(r => {
+    html += `<tr>
+      <td>${fmtLabel(r.ds, gran)}</td>
+      <td>${fmtNum(r.new)}</td>
+      <td>${fmtNum(r.cum)}</td>
+      <td>${fmtUsd(r.payout)}</td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+function renderAll(gran) {
+  render(gran);
+  renderPayout(gran);
+}
+
 document.getElementById('granularity-toggle').addEventListener('click', e => {
   const btn = e.target.closest('.toggle-btn');
   if (!btn) return;
   document.querySelectorAll('#granularity-toggle .toggle-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  render(btn.dataset.gran);
+  renderAll(btn.dataset.gran);
 });
 
-render('daily');
+renderAll('daily');
 </script>
 </body>
 </html>
